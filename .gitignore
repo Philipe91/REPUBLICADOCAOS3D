@@ -1,0 +1,7 @@
+node_modules
+dist
+test/shots
+.DS_Store
+
+Claude outputs/
+standalone/

@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@600;800;900&display=swap');
+
+:root {
+  --player: #2bb3c0;
+  --bot: #e8772e;
+  --gold: #ffd23f;
+  --ink: #1b1b2a;
+  --paper: #fff8e6;
+  --panel: rgba(20, 22, 38, 0.82);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #6fb2d6; font-family: 'Nunito', system-ui, sans-serif; user-select: none; }
+#game-canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hidden { display: none !important; }
+
+/* ---------- HUD ---------- */
+#hud { position: fixed; inset: 0; pointer-events: none; }
+.hud-panel { position: absolute; top: 14px; background: var(--panel); color: #fff; padding: 10px 14px; border-radius: 14px; min-width: 210px; border: 2px solid rgba(255,255,255,0.12); box-shadow: 0 6px 20px rgba(0,0,0,0.25); backdrop-filter: blur(6px); }
+#hud-left { left: 14px; }
+#hud-right { right: 14px; text-align: right; }
+.hud-title { font-family: 'Bangers', cursive; font-size: 24px; letter-spacing: 1.5px; color: var(--gold); text-shadow: 2px 2px 0 #000; }
+#hud-right .hud-title { color: var(--bot); }
+.hud-sub { font-size: 10px; font-weight: 900; letter-spacing: 1.5px; opacity: 0.7; margin-top: 6px; }
+.bar { position: relative; height: 16px; background: rgba(0,0,0,0.5); border-radius: 8px; overflow: hidden; margin-top: 4px; border: 1px solid rgba(255,255,255,0.15); }
+.bar .fill { height: 100%; width: 100%; background: linear-gradient(90deg, #35d46a, #7ff0a0); transition: width 0.15s ease-out; border-radius: 8px; }
+.bar.enemy .fill { background: linear-gradient(90deg, #f0632b, #ffb06a); float: right; }
+.bar span { position: absolute; inset: 0; text-align: center; font-size: 11px; font-weight: 900; line-height: 16px; text-shadow: 1px 1px 0 #000; }
+.capital-pips { display: flex; gap: 3px; margin-top: 4px; }
+#hud-right .capital-pips { justify-content: flex-end; }
+.capital-pips .pip { width: 17px; height: 10px; border-radius: 3px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); position: relative; overflow: hidden; }
+.capital-pips.small .pip { width: 12px; height: 7px; }
+.capital-pips .pip.on { background: linear-gradient(180deg, #ffe680, #f5b400); border-color: #fff2b0; box-shadow: 0 0 6px rgba(255,210,63,0.6); }
+.capital-pips .pip.partial::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p, 0%); background: rgba(255,230,128,0.55); }
+.capital-text { font-family: 'Bangers', cursive; font-size: 22px; color: var(--gold); margin-top: 2px; text-shadow: 2px 2px 0 #000; }
+.capital-text.full { animation: pulse 0.8s infinite alternate; }
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.08); color: #fff; } }
+
+#hud-center { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); text-align: center; }
+#timer { font-family: 'Bangers', cursive; font-size: 40px; color: #fff; text-shadow: 3px 3px 0 #000; background: var(--panel); padding: 2px 22px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.12); }
+#timer.treta { color: #ff5a5a; animation: pulse 0.5s infinite alternate; }
+#phase-label { font-family: 'Bangers', cursive; font-size: 22px; color: #ff5a5a; text-shadow: 2px 2px 0 #000; letter-spacing: 2px; margin-top: 4px; min-height: 26px; }
+
+#meme-text { position: absolute; top: 24%; left: 50%; transform: translate(-50%, -50%) scale(0); font-family: 'Bangers', cursive; font-size: 84px; color: var(--gold); text-shadow: 4px 4px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; letter-spacing: 3px; white-space: nowrap; opacity: 0; pointer-events: none; }
+#meme-text.show { animation: memePop 1.3s cubic-bezier(.2,1.4,.4,1) forwards; }
+@keyframes memePop { 0% { transform: translate(-50%,-50%) scale(0) rotate(-8deg); opacity: 0; } 15% { transform: translate(-50%,-50%) scale(1.15) rotate(3deg); opacity: 1; } 30% { transform: translate(-50%,-50%) scale(1) rotate(-2deg); } 80% { opacity: 1; transform: translate(-50%,-50%) scale(1.05) rotate(0deg); } 100% { opacity: 0; transform: translate(-50%,-60%) scale(1.2); } }
+
+#lane-hint { position: absolute; bottom: 190px; left: 50%; transform: translateX(-50%); font-family: 'Bangers', cursive; font-size: 26px; color: #fff; text-shadow: 2px 2px 0 #000; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; }
+#lane-hint.show { opacity: 1; }
+
+/* ---------- MÃO DE CARTAS ---------- */
+#hand { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; pointer-events: auto; }
+.card { width: 118px; height: 156px; border-radius: 14px; background: linear-gradient(160deg, #fffaf0, #f2e6c9); border: 3px solid #3a2f1c; box-shadow: 0 6px 0 #3a2f1c, 0 10px 20px rgba(0,0,0,0.35); position: relative; cursor: pointer; transition: transform 0.15s cubic-bezier(.2,1.4,.4,1), box-shadow 0.15s, filter 0.15s; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+.card:hover { transform: translateY(-14px) rotate(-1deg); }
+.card.selected { transform: translateY(-22px) scale(1.06); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(255,210,63,0.5), 0 0 30px rgba(255,210,63,0.8), 0 6px 0 #3a2f1c; }
+.card.disabled { filter: grayscale(0.8) brightness(0.6); cursor: not-allowed; }
+.card.disabled:hover { transform: none; }
+.card .cost { position: absolute; top: -4px; left: -4px; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe680, #e0a000); border: 3px solid #3a2f1c; font-family: 'Bangers', cursive; font-size: 22px; display: flex; align-items: center; justify-content: center; color: #1b1b2a; z-index: 2; }
+.card .icon { font-size: 52px; margin-top: 22px; line-height: 1; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.25)); }
+.card .name { font-family: 'Bangers', cursive; font-size: 17px; letter-spacing: 1px; color: #1b1b2a; margin-top: 8px; text-align: center; line-height: 1; padding: 0 4px; }
+.card .name.long { font-size: 14px; letter-spacing: 0.5px; }
+.card .type { font-size: 9px; font-weight: 900; letter-spacing: 1.5px; color: #fff; background: #3a2f1c; padding: 2px 8px; border-radius: 8px; margin-top: auto; margin-bottom: 8px; }
+.card.power { background: linear-gradient(160deg, #e9dcff, #c9b6ff); }
+.card.power .type { background: #4b2a8f; }
+.card .pop { position: absolute; inset: 0; background: rgba(255,255,255,0.7); opacity: 0; pointer-events: none; }
+.card.played .pop { animation: cardPop 0.35s ease-out; }
+@keyframes cardPop { 0% { opacity: 1; } 100% { opacity: 0; } }
+.card.enter { animation: cardEnter 0.35s cubic-bezier(.2,1.4,.4,1); }
+@keyframes cardEnter { from { transform: translateY(60px) scale(0.6); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+#next-card { position: absolute; bottom: 24px; left: calc(50% + 280px); color: #fff; font-size: 9px; font-weight: 900; letter-spacing: 1.5px; text-align: center; opacity: 0.85; }
+#next-card-box { width: 56px; height: 72px; border-radius: 8px; background: #f2e6c9; border: 2px solid #3a2f1c; margin-top: 4px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+
+/* ---------- TELAS ---------- */
+.screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 30%, rgba(30,34,70,0.75), rgba(10,10,25,0.92)); z-index: 20; }
+.screen-box { text-align: center; color: #fff; padding: 36px 48px; background: rgba(20,22,38,0.85); border-radius: 24px; border: 3px solid rgba(255,255,255,0.12); box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-width: 92vw; }
+.screen-box.wide { width: 900px; }
+.logo { font-family: 'Bangers', cursive; font-size: 92px; line-height: 0.9; margin: 0; color: var(--gold); text-shadow: 5px 5px 0 #000, -2px -2px 0 #000; letter-spacing: 4px; transform: rotate(-2deg); }
+.logo-sub { font-family: 'Bangers', cursive; font-size: 34px; margin: 12px 0 0; color: #fff; letter-spacing: 4px; text-shadow: 3px 3px 0 #000; }
+.tagline { opacity: 0.75; font-size: 14px; margin: 14px 0 22px; }
+.hint { opacity: 0.5; font-size: 12px; margin-top: 18px; }
+.menu-buttons { display: flex; gap: 14px; justify-content: center; margin-top: 10px; }
+.btn { font-family: 'Bangers', cursive; font-size: 26px; letter-spacing: 2px; padding: 10px 34px; border-radius: 14px; border: 3px solid #3a2f1c; background: #f2e6c9; color: #1b1b2a; cursor: pointer; box-shadow: 0 5px 0 #3a2f1c; transition: transform 0.1s, box-shadow 0.1s; }
+.btn:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #3a2f1c; }
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #3a2f1c; }
+.btn.primary { background: linear-gradient(180deg, #ffe680, #f5b400); }
+#end-title.defeat { color: #ff5a5a; }
+#end-stats { display: flex; gap: 24px; justify-content: center; margin: 20px 0; }
+#end-stats .stat { background: rgba(0,0,0,0.35); padding: 10px 18px; border-radius: 12px; min-width: 120px; }
+#end-stats .stat b { display: block; font-family: 'Bangers', cursive; font-size: 30px; color: var(--gold); letter-spacing: 1px; }
+#end-stats .stat span { font-size: 11px; font-weight: 900; letter-spacing: 1.5px; opacity: 0.7; }
+
+#deck-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 10px 0 20px; }
+#deck-grid .card { width: 100%; height: 140px; }
+#deck-grid .card.in-deck { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,210,63,0.5), 0 6px 0 #3a2f1c; }
+#deck-grid .card:not(.in-deck) { filter: grayscale(0.7) brightness(0.7); }
+#deck-grid .card .desc { font-size: 9px; color: #333; padding: 0 6px; text-align: center; line-height: 1.15; }
+
+/* ---------- DEBUG ---------- */
+#debug-overlay { position: fixed; left: 14px; top: 190px; color: #0f0; font: 12px/1.4 monospace; background: rgba(0,0,0,0.6); padding: 8px 10px; border-radius: 8px; pointer-events: none; white-space: pre; z-index: 15; }
+
+/* lil-gui */
+.lil-gui { --width: 300px; --font-size: 11px; z-index: 30 !important; max-height: 96vh; }
+.lil-gui.root { top: 10px !important; right: 240px !important; }
+
+/* ---------- RESPONSIVO ---------- */
+@media (max-height: 760px) {
+  .card { width: 100px; height: 132px; }
+  .card .icon { font-size: 42px; margin-top: 18px; }
+  .card .name { font-size: 15px; }
+  .logo { font-size: 70px; }
+}

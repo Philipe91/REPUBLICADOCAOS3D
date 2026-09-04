@@ -1,0 +1,19 @@
+{
+  "name": "republica-do-caos",
+  "version": "0.1.0",
+  "description": "REPÚBLICA DO CAOS — Batalha pelo Planalto. Sátira cartunesca 3D no navegador (Three.js + Vite).",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lil-gui": "^0.20.0",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

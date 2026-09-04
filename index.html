@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REPÚBLICA DO CAOS — Batalha pelo Planalto</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E🏛️%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./src/ui/ui.css" />
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="hud-left" class="hud-panel">
+      <div class="hud-title">REPÚBLICA DO CAOS</div>
+      <div class="hud-sub">SUA SEDE DO PODER</div>
+      <div class="bar hp-bar"><div id="player-hp-fill" class="fill"></div><span id="player-hp-text">5000</span></div>
+      <div class="hud-sub">CAPITAL POLÍTICO</div>
+      <div id="capital-pips" class="capital-pips"></div>
+      <div id="capital-text" class="capital-text">0 / 10</div>
+    </div>
+
+    <div id="hud-center">
+      <div id="timer">3:00</div>
+      <div id="phase-label"></div>
+    </div>
+
+    <div id="hud-right" class="hud-panel">
+      <div class="hud-title">BOT</div>
+      <div class="hud-sub">SEDE INIMIGA</div>
+      <div class="bar hp-bar enemy"><div id="bot-hp-fill" class="fill"></div><span id="bot-hp-text">5000</span></div>
+      <div class="hud-sub">CAPITAL</div>
+      <div id="bot-capital-pips" class="capital-pips small"></div>
+    </div>
+
+    <div id="meme-text"></div>
+    <div id="lane-hint"></div>
+
+    <div id="hand"></div>
+    <div id="next-card"><span>PRÓXIMA</span><div id="next-card-box"></div></div>
+  </div>
+
+  <!-- Debug overlay -->
+  <div id="debug-overlay" class="hidden"></div>
+
+  <!-- Menu -->
+  <div id="menu-screen" class="screen">
+    <div class="screen-box">
+      <h1 class="logo">REPÚBLICA<br/>DO CAOS</h1>
+      <h2 class="logo-sub">BATALHA PELO PLANALTO</h2>
+      <p class="tagline">Sátira cartunesca. Nenhum político foi ferido (fisicamente).</p>
+      <div class="menu-buttons">
+        <button id="btn-play" class="btn primary">JOGAR</button>
+        <button id="btn-deck" class="btn">MONTAR DECK</button>
+      </div>
+      <p class="hint">G = painel de ajustes · Clique na carta, depois na lane</p>
+    </div>
+  </div>
+
+  <!-- Deck builder -->
+  <div id="deck-screen" class="screen hidden">
+    <div class="screen-box wide">
+      <h2 class="logo-sub">MONTE SEU DECK</h2>
+      <p class="tagline">Escolha 8 cartas. <span id="deck-count">8/8</span></p>
+      <div id="deck-grid"></div>
+      <div class="menu-buttons">
+        <button id="btn-deck-back" class="btn primary">VOLTAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End screen -->
+  <div id="end-screen" class="screen hidden">
+    <div class="screen-box">
+      <h1 id="end-title" class="logo">VITÓRIA</h1>
+      <h2 id="end-sub" class="logo-sub">A OPOSIÇÃO CAIU</h2>
+      <div id="end-stats"></div>
+      <div class="menu-buttons">
+        <button id="btn-restart" class="btn primary">JOGAR NOVAMENTE</button>
+        <button id="btn-menu" class="btn">MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
