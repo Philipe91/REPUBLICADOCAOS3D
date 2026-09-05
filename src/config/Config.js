@@ -19,14 +19,25 @@ export const Config = {
     baseDamageFeedback: 1.0, // intensidade dos efeitos de dano na base
   },
 
+  // ---------- CÂMERA LATERAL ----------
+  // A lógica do jogo NÃO muda: o eixo principal continua sendo Z (base do jogador em
+  // z = +20, base do bot em z = −20) e as lanes continuam em x = −6 / 0 / +6.
+  // A vista lateral vem SÓ da câmera: ela fica no lado +X da arena e olha para −X.
+  // Na tela, portanto:
+  //   Z lógico  → HORIZONTAL (z = +20 do jogador à ESQUERDA, z = −20 do bot à DIREITA)
+  //   X lógico  → PROFUNDIDADE (lane x = +6 frontal/perto, x = 0 central, x = −6 traseira)
+  //   Y lógico  → vertical, como sempre.
+  // A posição da câmera é DERIVADA do alvo (helper cameraPosition em CameraController.js):
+  //   pos = (targetX + cameraSide * cameraDistance, cameraHeight, targetZ + cameraSideOffset)
   camera: {
-    cameraX: 0,
-    cameraY: 38,
-    cameraZ: 44,
-    cameraFov: 38,
+    cameraSide: 1,          // +1 = câmera no lado +X (jogador à esquerda); −1 espelha a vista
+    cameraDistance: 24,     // afastamento lateral da câmera (eixo X) em relação ao alvo
+    cameraHeight: 11.5,     // altura (Y) absoluta da câmera
+    cameraSideOffset: 0,    // deslocamento da câmera ao longo de Z (enquadramento horizontal)
+    cameraFov: 51,
     cameraTargetX: 0,
-    cameraTargetY: 0,
-    cameraTargetZ: 3,
+    cameraTargetY: 1.7,
+    cameraTargetZ: 0,
     cameraShakeStrength: 1.0,
   },
 
@@ -55,6 +66,7 @@ export const Config = {
 
   visual: {
     characterScale: 1.0,
+    baseVisualScale: 1.0,   // escala visual das SEDES DO PODER (ainda NÃO aplicada — Entrega B)
     headScale: 1.4,
     shadowEnabled: true,
     particleAmount: 1.0,

@@ -103,40 +103,56 @@ export class Arena {
       }
     }
 
-    // fundo de cada lado: prédios governamentais fictícios
+    // ============================================================
+    // DECORAÇÃO — regra da CÂMERA LATERAL (ver Config.camera):
+    // a câmera fica no lado +X e olha para −X, ou seja, o lado +X é o PRIMEIRO PLANO.
+    // Nada alto (poste, placa, palanque, carro, cone, árvore, bandeira) pode ficar em
+    // x > +TOTALW/2 dentro do campo: só decoração rasteira (papéis, meio-fio).
+    // Todo o cenário vertical vive no lado −X (fundo, atrás da lane traseira) ou além
+    // das bases (|z| > half), onde vira horizonte à esquerda e à direita da tela.
+    // ============================================================
+    const back = -totalW / 2 - 3.5;   // faixa de fundo (lado −X), atrás da lane traseira
+    const back2 = back - 6;           // segunda fileira de fundo
+
+    // fundo de cada lado: prédios governamentais fictícios (extremos horizontais da tela)
     this.addGovBuildings(-1);
     this.addGovBuildings(1);
 
-    // postes ao longo das laterais
-    for (let z = -half + 2; z <= half - 2; z += 7) {
-      this.addLampPost(-totalW / 2 - 1.2, z);
-      this.addLampPost(totalW / 2 + 1.2, z);
-    }
+    // postes: só na lateral do FUNDO (o lado +X ficaria na frente da câmera)
+    for (let z = -half + 2; z <= half - 2; z += 7) this.addLampPost(back + 2.3, z);
+    // postes além das bases, dando profundidade no horizonte
+    for (const z of [-half - 6, half + 6]) { this.addLampPost(back + 2.3, z); this.addLampPost(6, z); }
 
-    // decoração lateral: cones, carros, palanque, placas, papéis
-    const side = totalW / 2 + 3.5;
-    this.addCar(-side - 2, -6, 0xd94a4a, Math.PI / 2);
-    this.addCar(side + 2, 5, 0x3f6fd6, -Math.PI / 2);
-    this.addCar(-side - 2.5, 11, 0xf0d53a, Math.PI / 2 + 0.2);
-    for (let i = 0; i < 6; i++) this.addCone(side + rand(-1, 1), rand(-14, 14));
-    for (let i = 0; i < 4; i++) this.addCone(-side + rand(-1, 1), rand(-14, 14));
-    this.addPalanque(side + 5, -14);
-    this.addPalanque(-side - 5, 13, true);
-    this.addSign(-side - 0.5, -1, 'PROIBIDO\nESTACIONAR\n(exceto os importantes)');
-    this.addSign(side + 0.5, 9, 'OBRAS\nDESDE 2009');
-    this.addSign(side + 1, -10, 'ÁREA DE\nTRETA');
-    this.addSign(-side - 1, 6, 'NÃO VALE\nPRINT');
-    for (let i = 0; i < 40; i++) this.addPaper(rand(-totalW / 2 - 6, totalW / 2 + 6), rand(-half, half));
-    // bandeiras genéricas nos cantos
-    this.addFlag(-totalW / 2 - 3, -half + 1, 0xffffff, 0x33aa55);
-    this.addFlag(totalW / 2 + 3, -half + 1, 0xffffff, 0xf0c419);
-    this.addFlag(-totalW / 2 - 3, half - 1, 0xffffff, 0x2bb3c0);
-    this.addFlag(totalW / 2 + 3, half - 1, 0xffffff, 0xe8772e);
-    // gramado externo com árvores espalhadas
+    // carros, cones, palanques e placas — todos no fundo ou além das bases
+    this.addCar(back - 2, -6, 0xd94a4a, Math.PI / 2);
+    this.addCar(back - 3.5, 5, 0x3f6fd6, Math.PI / 2);
+    this.addCar(back - 2.5, 14, 0xf0d53a, Math.PI / 2 + 0.2);
+    this.addCar(4, -half - 8, 0x4fae62, 0);
+    for (let i = 0; i < 6; i++) this.addCone(back + rand(-1.5, 0.5), rand(-16, 16));
+    for (let i = 0; i < 4; i++) this.addCone(rand(-8, 8), (i < 2 ? -1 : 1) * (half + rand(4, 9)));
+    this.addPalanque(back2 - 1, -14, true);
+    this.addPalanque(back2 - 1, 13, true);
+    // placas: em x negativo elas ficam VOLTADAS PARA A CÂMERA (addSign gira +Z → +X) e legíveis
+    this.addSign(back - 0.5, -18, 'PROIBIDO\nESTACIONAR\n(exceto os importantes)');
+    this.addSign(back - 0.5, -7, 'OBRAS\nDESDE 2009');
+    this.addSign(back - 0.5, 4, 'ÁREA DE\nTRETA');
+    this.addSign(back - 0.5, 16, 'NÃO VALE\nPRINT');
+    // papéis: rasteiros (y = 0.03), podem ficar dos dois lados sem atrapalhar a leitura
+    for (let i = 0; i < 40; i++) this.addPaper(rand(-totalW / 2 - 6, totalW / 2 + 5), rand(-half, half));
+    // bandeiras genéricas: fundo e além das bases
+    this.addFlag(back2, -half + 1, 0xffffff, 0x33aa55);
+    this.addFlag(back2, half - 1, 0xffffff, 0x2bb3c0);
+    this.addFlag(back2 - 5, -half - 7, 0xffffff, 0xf0c419);
+    this.addFlag(back2 - 5, half + 7, 0xffffff, 0xe8772e);
+    // gramado externo com árvores espalhadas — nunca entre a câmera e o campo
     for (let i = 0; i < 26; i++) {
-      const x = rand(-60, 60); const z = rand(-60, 60);
-      if (Math.abs(x) < totalW / 2 + 6 && Math.abs(z) < half + 8) continue;
+      const x = rand(-60, back2 - 3); const z = rand(-60, 60);
       this.addTree(x, z, rand(0.9, 1.6));
+    }
+    // algumas árvores além das bases (horizonte nos extremos esquerdo/direito da tela)
+    for (let i = 0; i < 10; i++) {
+      const z = (i % 2 ? 1 : -1) * rand(half + 12, 55);
+      this.addTree(rand(back2, 10), z, rand(0.9, 1.6));
     }
   }
 
@@ -226,9 +242,8 @@ export class Arena {
     const plat = mesh(G.box(22, 1.2, 8), wall, 0, 0.6, zBase); this.root.add(plat);
     const dome = mesh(G.sphere(3.2, 16), wall, -8, 1.2, zBase); dome.scale.y = 0.75; this.root.add(dome);
     const bowl = mesh(G.sphere(3.2, 16), wall, 8, 3.5, zBase); bowl.scale.y = 0.75; bowl.rotation.x = Math.PI; this.root.add(bowl);
-    // palácios com colunas laterais
-    for (const side of [-1, 1]) {
-      const px = side * 20;
+    // palácios com colunas: ambos no lado −X (em +X ficariam colados na câmera lateral)
+    for (const px of [-16, -31]) {
       const body = mesh(G.box(9, 4, 5), wall, px, 2, zBase + dir * 2); this.root.add(body);
       const roof = mesh(G.box(10, 0.5, 6), lambert(0xe8e2d0), px, 4.2, zBase + dir * 2); this.root.add(roof);
       for (let i = -4; i <= 4; i += 2) {
@@ -236,7 +251,7 @@ export class Arena {
         col.rotation.z = 0; this.root.add(col);
       }
       // bandeiras genéricas
-      this.addFlag(px - 6, zBase - dir * 4, 0xffffff, side < 0 ? 0x33aa55 : 0xf0c419);
+      this.addFlag(px - 6, zBase - dir * 4, 0xffffff, px < -20 ? 0x33aa55 : 0xf0c419);
     }
     // gramado grande com espelho d'água (plano azul)
     const water = mesh(G.box(16, 0.1, 3), lambert(0x4aa0d8), 0, 0.02, zBase - dir * 6);

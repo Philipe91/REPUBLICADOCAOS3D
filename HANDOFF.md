@@ -56,11 +56,14 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 | Etapa | Status |
 |---|---|
 | Plano E1..E12 | ✅ escrito, commitado |
+| Câmera lateral (pré-E1, pedido do Philipe em 04/09) | ✅ implementada e commitada — aguarda aprovação VISUAL do Philipe |
 | Aprovação do plano pelo Philipe | ⏳ pendente (ele viu o resumo, ainda não disse "aprovado") |
 | E1 Fundação técnica (TimeController, PerfStats, Stress Test, chaves lil-gui) | ⬜ não iniciada |
 | E2..E12 | ⬜ não iniciadas |
 
-**Próximo passo concreto:** confirmar com o Philipe que o plano está aprovado (ou ajustar o que ele pedir) e começar a **E1**. Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
+**Câmera lateral (04/09, PC de casa):** a lógica do jogo NÃO mudou (eixo Z, lanes em x). A câmera fica no lado +X olhando para −X: base do jogador à esquerda, bot à direita, lanes em profundidade. `Config.camera` agora é `cameraSide/cameraDistance/cameraHeight/cameraSideOffset/cameraTarget*/cameraFov` (posição derivada em `CameraController.cameraPosition`). Decoração alta da Arena foi para o lado −X/além das bases. `visual.baseVisualScale` criada (1.0). Harness `test/*.mjs` portado para Windows (`executablePath` do playwright, `shell:true`, `VIEWPORT=`). Medido na RTX 3060: ~200 fps, 570–780 draw calls com 10–19 unidades.
+
+**Próximo passo concreto:** Philipe aprova visualmente a câmera (ou ajusta no lil-gui → COPIAR CONFIG → cola os valores) e confirma o plano; só então começar a **E1**. Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 

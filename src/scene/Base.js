@@ -114,7 +114,8 @@ export class Base {
     this.body.visible = true;
     this.body.position.copy(this.bodyRest.pos);
     this.body.rotation.copy(this.bodyRest.rot);
-    this.root.scale.set(1, 1, 1);
+    // escala SÓ visual (não mexe em this.z / front / hitPoint / alcance)
+    this.root.scale.setScalar(Config.visual.baseVisualScale);
     this.wallMat.emissive.setHex(0x000000);
   }
 
@@ -173,12 +174,13 @@ export class Base {
       this.flashTimer -= dt;
       this.wallMat.emissive.setHex(this.flashTimer > 0 ? 0xff5533 : 0x000000);
     }
-    // wobble no impacto
+    // wobble no impacto (sempre multiplicado pela escala visual — editável no lil-gui)
+    const bs = Config.visual.baseVisualScale;
     if (this.hitWobble > 0) {
       this.hitWobble = Math.max(0, this.hitWobble - dt * 4);
       const s = 1 + Math.sin(this.hitWobble * 20) * 0.03 * this.hitWobble * Config.base.baseDamageFeedback;
-      if (!this.destroyed) this.root.scale.set(s, 1 / s, s);
-    }
+      if (!this.destroyed) this.root.scale.set(bs * s, bs / s, bs * s);
+    } else if (!this.destroyed) this.root.scale.setScalar(bs);
     // bandeira balança
     if (this.flag && !this.flag.userData.vel) this.flag.rotation.y = Math.sin(this.time * 3) * 0.15;
 

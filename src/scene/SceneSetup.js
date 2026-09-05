@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Config } from '../config/Config.js';
+import { cameraPosition, cameraTarget } from './CameraController.js';
 
 export function createRenderer(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -45,7 +46,7 @@ export function createScene() {
 export function createCamera() {
   const c = Config.camera;
   const camera = new THREE.PerspectiveCamera(c.cameraFov, window.innerWidth / window.innerHeight, 0.5, 300);
-  camera.position.set(c.cameraX, c.cameraY, c.cameraZ);
-  camera.lookAt(c.cameraTargetX, c.cameraTargetY, c.cameraTargetZ);
+  camera.position.copy(cameraPosition(new THREE.Vector3(), c));
+  camera.lookAt(cameraTarget(new THREE.Vector3(), c));
   return camera;
 }

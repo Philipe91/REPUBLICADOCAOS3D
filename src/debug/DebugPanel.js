@@ -8,11 +8,12 @@ import { Config } from '../config/Config.js';
 const RANGES = {
   game: { gameSpeed: [0.1, 6, 0.1], capitalRegen: [0.2, 5, 0.1], startingCapital: [0, 10, 1], maxCapital: [5, 20, 1], matchDuration: [30, 600, 5], botDifficulty: [0.2, 3, 0.1] },
   base: { baseHP: [500, 20000, 100], baseDamageFeedback: [0, 3, 0.1] },
-  camera: { cameraX: [-40, 40, 0.5], cameraY: [5, 80, 0.5], cameraZ: [-40, 80, 0.5], cameraFov: [15, 100, 1], cameraTargetX: [-30, 30, 0.5], cameraTargetY: [-10, 20, 0.5], cameraTargetZ: [-30, 30, 0.5], cameraShakeStrength: [0, 3, 0.1] },
+  // câmera lateral: cameraSide é enum e entra fora do loop (ver build())
+  camera: { cameraDistance: [8, 70, 0.5], cameraHeight: [0, 45, 0.5], cameraSideOffset: [-30, 30, 0.5], cameraFov: [15, 100, 1], cameraTargetX: [-20, 20, 0.5], cameraTargetY: [-2, 16, 0.1], cameraTargetZ: [-30, 30, 0.5], cameraShakeStrength: [0, 3, 0.1] },
   lanes: { laneSpacing: [4, 10, 0.5], laneWidth: [2, 8, 0.5], spawnOffset: [0, 10, 0.5], fieldLength: [30, 70, 1] },
   combat: { globalDamageMultiplier: [0.1, 5, 0.05], globalHPMultiplier: [0.1, 5, 0.05], globalMoveSpeedMultiplier: [0.1, 4, 0.05], knockbackStrength: [0, 4, 0.1], hitStopDuration: [0, 0.3, 0.01], bigHitThreshold: [10, 300, 5] },
   bot: { botDecisionInterval: [0.3, 5, 0.1], botAggressiveness: [0, 2, 0.05], botDefenseBias: [0, 2, 0.05], botRandomness: [0, 1, 0.05] },
-  visual: { characterScale: [0.4, 2.5, 0.05], headScale: [0.8, 2.5, 0.05], particleAmount: [0, 3, 0.1], memeFrequency: [0, 3, 0.1] },
+  visual: { characterScale: [0.4, 2.5, 0.05], baseVisualScale: [0.4, 3, 0.05], headScale: [0.8, 2.5, 0.05], particleAmount: [0, 3, 0.1], memeFrequency: [0, 3, 0.1] },
 };
 
 const UNIT_RANGES = { hp: [1, 5000, 1], damage: [0, 500, 1], moveSpeed: [0.2, 20, 0.1], attackSpeed: [0.1, 5, 0.05], attackRange: [0.5, 15, 0.1], cost: [0, 10, 1], spawnCount: [1, 12, 1], knockback: [0, 5, 0.1], scale: [0.3, 3, 0.05], specialCooldown: [1, 60, 0.5] };
@@ -40,6 +41,9 @@ export class DebugPanel {
     for (const section in RANGES) {
       const f = gui.addFolder(labels[section]);
       f.close();
+      if (section === 'camera') {
+        f.add(Config.camera, 'cameraSide', { 'lado +X (jogador à esquerda)': 1, 'lado −X (espelhado)': -1 }).name('cameraSide');
+      }
       for (const key in RANGES[section]) {
         const [min, max, step] = RANGES[section][key];
         f.add(Config[section], key, min, max, step);

@@ -1,8 +1,9 @@
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
-const server = spawn('npx', ['vite', 'preview', '--port', '4175', '--strictPort'], { stdio: 'pipe' });
-await new Promise(r => setTimeout(r, 2500));
-const browser = await chromium.launch({ headless: true, executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const server = spawn('npx', ['vite', 'preview', '--port', '4175', '--strictPort'], { stdio: 'pipe', shell: true });
+await new Promise(r => setTimeout(r, 6000)); // npx no Windows leva mais tempo para subir o preview
+// executablePath: undefined = Chromium padrão do playwright (portátil Windows/Linux). PW_CHROMIUM força outro binário.
+const browser = await chromium.launch({ headless: true, executablePath: process.env.PW_CHROMIUM || undefined, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const page = await browser.newPage({ viewport: { width: 1000, height: 620 } });
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
@@ -16,8 +17,10 @@ await page.click('#btn-deck-back'); await page.click('#btn-play'); await page.wa
 await page.evaluate(() => { game.player.capital = 10; });
 await page.click('#hand .card:nth-child(1)'); await page.waitForTimeout(300);
 await page.screenshot({ path: 'test/shots/select.png' });
-await page.mouse.click(500, 380); await page.waitForTimeout(1500);
-const st = await page.evaluate(() => ({ units: game.units.count, cap: game.player.capital, sel: game.player.selected }));
+// ponto de clique = centro da lane do meio (lane 1) projetado pela câmera atual (vale para qualquer câmera)
+const pt = await page.evaluate(() => { const v = new game.cameraObj.position.constructor(game.arena.laneX(1), 0, 6).project(game.cameraObj); return { x: (v.x + 1) / 2 * innerWidth, y: (1 - v.y) / 2 * innerHeight }; });
+await page.mouse.click(pt.x, pt.y); await page.waitForTimeout(1500);
+const st = await page.evaluate(() => ({ units: game.units.count, playerLanes: game.units.units.filter(u => u.team === 'player').map(u => u.lane), cap: game.player.capital, sel: game.player.selected }));
 console.log('after manual play:', JSON.stringify(st));
 await page.screenshot({ path: 'test/shots/played.png' });
 await page.evaluate(() => game.finish(true)); await page.waitForFunction(() => !document.getElementById('end-screen').classList.contains('hidden'), null, { timeout: 60000 }); await page.waitForTimeout(500);

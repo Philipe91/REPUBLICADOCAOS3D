@@ -4,11 +4,12 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 
-const server = spawn('npx', ['vite', 'preview', '--port', '4173', '--strictPort'], { cwd: process.cwd(), stdio: 'pipe' });
-await new Promise(r => setTimeout(r, 2500));
+const server = spawn('npx', ['vite', 'preview', '--port', '4173', '--strictPort'], { cwd: process.cwd(), stdio: 'pipe', shell: true });
+await new Promise(r => setTimeout(r, 6000)); // npx no Windows leva mais tempo para subir o preview
 
+// executablePath: undefined = Chromium padrão do playwright (portátil Windows/Linux). PW_CHROMIUM força outro binário.
 const browser = await chromium.launch({
-  headless: true, executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  headless: true, executablePath: process.env.PW_CHROMIUM || undefined,
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 });
 const page = await browser.newPage({ viewport: { width: 960, height: 600 } });

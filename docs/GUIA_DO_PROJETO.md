@@ -60,7 +60,7 @@ Teste automático (requer `npm i -D playwright`, removido do package.json de pro
 ```bash
 node test/run.mjs        # bot vs bot em velocidade alta; imprime RESULT e ERRORS
 node test/screens.mjs    # menu, deck, jogada manual, vitória, derrota, restart
-node test/shot.mjs '{"camera":{"cameraY":40}}' out.png 5   # screenshot com overrides de Config
+node test/shot.mjs '{"camera":{"cameraDistance":30}}' out.png 5   # screenshot com overrides de Config (VIEWPORT=1280x720 muda a resolução)
 ```
 
 ## 4. Arquitetura (o mapa)
@@ -100,9 +100,10 @@ src/
 ```
 
 ### Coordenadas do campo
-- Eixo principal é **Z**. Base do jogador em z = +20 (embaixo da tela), base do bot em z = −20.
+- Eixo principal é **Z**. Base do jogador em z = +20, base do bot em z = −20.
 - Jogador avança para −z (`dir = −1`), bot para +z (`dir = +1`).
 - Lanes em x = −6 / 0 / +6 (`laneSpacing`), largura 4. Sem navmesh: a unidade só anda em z e volta suavemente ao seu offset lateral.
+- **Câmera lateral** (desde o commit da câmera lateral): a câmera fica no lado **+X** da arena e olha para −X (`Config.camera`: `cameraSide`, `cameraDistance`, `cameraHeight`, `cameraSideOffset`, alvo e fov; posição derivada em `CameraController.cameraPosition`). Na tela, Z lógico é o eixo **horizontal** (base do jogador à esquerda, bot à direita) e X lógico é a **profundidade** (lane x = +6 frontal, 0 central, −6 traseira). Nada da lógica mudou com isso; a decoração alta da Arena vive no lado −X (fundo) ou além das bases para não ficar entre a câmera e o campo.
 - `arena.baseFront` é a face da base voltada ao campo; a unidade ataca a base quando `|z − baseFront| ≤ attackRange`.
 
 ### Fluxo da unidade
@@ -133,7 +134,7 @@ Método de trabalho que deu certo e deve continuar:
 
 1. **Escrever o arquivo de verdade**, nunca código teórico. Um sistema por arquivo, nomes explícitos.
 2. **Buildar e rodar sempre** (`npm run build` + teste headless). Erro no console é bug bloqueante — o primeiro bug encontrado foi exatamente assim (Base sem `isBase`, unidade quebrava ao mirar a base).
-3. **Screenshot para decisões visuais** (câmera, escala dos bonecos, barras de vida). A câmera atual (pos 0/38/44, alvo 0/0/3, fov 38) foi escolhida olhando capturas, não chutando.
+3. **Screenshot para decisões visuais** (câmera, escala dos bonecos, barras de vida). A câmera lateral atual (distância 24, altura 11.5, alvo 0/1.7/0, fov 51) foi escolhida olhando capturas, não chutando — a top-down anterior (0/38/44, fov 38) também.
 4. **Números só no Config.** Se precisar de um valor novo, cria no `Config.js` e ele aparece no lil-gui automaticamente (`DebugPanel` percorre `Config.units` e `Config.powers`).
 5. **Visual nunca vaza pra lógica.** Qualquer coisa que o boneco precise fazer entra como método da interface `CharacterVisual`, implementado no procedural e no GLB.
 6. **Pooling em tudo que nasce e morre rápido** (partículas, projéteis, floating text, motos, canetas). Personagens não são pooled (são poucos e têm materiais clonados para o flash individual).
