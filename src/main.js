@@ -22,11 +22,13 @@ window.Config = Config;
 window.bus = bus;   // testes automáticos escutam eventos por aqui
 window.debugPanel = panel;
 window.assetManager = assetManager;   // testes: assetManager.enabled = false força o visual procedural
+assetManager.enabled = !!Config.visual.useGLB;   // Config.visual.useGLB liga os modelos do Blender
 
 // Suporte a parâmetros de URL para testes: ?auto=1&speed=4&autostart=1
 const params = new URLSearchParams(location.search);
 if (params.get('auto') === '1') Config.debug.autoPlayer = true;
 if (params.get('speed')) Config.game.gameSpeed = parseFloat(params.get('speed'));
 if (params.get('dur')) Config.game.matchDuration = parseFloat(params.get('dur'));   // testes: partida curta → TRETA FINAL
+if (params.get('glb')) { Config.visual.useGLB = params.get('glb') === '1'; assetManager.enabled = Config.visual.useGLB; }   // ?glb=1 força os modelos do Blender
 if (params.get('debug') === '1') { Config.debug.showStats = true; Config.debug.showAIDecisions = true; Config.perf.showPerfOverlay = true; }
 if (params.get('autostart') === '1') { game.screens.hideAll(); game.startMatch(); }

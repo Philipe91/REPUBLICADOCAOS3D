@@ -16,7 +16,7 @@ page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
 const check = (name, cond, info = '') => { console.log((cond ? '✔ ' : '✘ ') + name, info); if (!cond) fails.push(name); };
 const ev = (fn, arg) => page.evaluate(fn, arg);
 
-await page.goto('http://localhost:4193/?autostart=1&speed=1');
+await page.goto('http://localhost:4193/?autostart=1&speed=1&glb=1');
 await page.waitForTimeout(3500);   // preload dos GLBs
 const r = await ev(() => {
   Config.debug.autoPlayer = false; Config.bot.botAggressiveness = 0; Config.bot.botDefenseBias = 0; Config.game.capitalRegen = 100; game.botCtrl.capital = 0;

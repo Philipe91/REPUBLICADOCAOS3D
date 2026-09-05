@@ -4,6 +4,7 @@
 // ============================================================
 import GUI from 'lil-gui';
 import { Config } from '../config/Config.js';
+import { assetManager } from '../visual/AssetManager.js';
 
 const RANGES = {
   game: { tretaFinalSpeedMultiplier: [0.5, 3, 0.05], capitalRegen: [0.2, 5, 0.1], startingCapital: [0, 10, 1], maxCapital: [5, 20, 1], matchDuration: [30, 600, 5], botDifficulty: [0.2, 3, 0.1] },
@@ -57,6 +58,7 @@ export class DebugPanel {
         f.add(Config.visual, 'floatingDamageEnabled');
         f.add(Config.visual, 'debugLaneMarkers');
         f.add(Config.visual, 'showUnitNameOnSpawn');
+        f.add(Config.visual, 'useGLB').name('useGLB (Blender) — vale para unidades novas').onChange(v => { assetManager.enabled = !!v; });
       }
     }
     if (this.game.audio) gui.add(this.game.audio, 'volume', 0, 1, 0.05).name('volume').onChange(v => this.game.audio.setVolume(v));
