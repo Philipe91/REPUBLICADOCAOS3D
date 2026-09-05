@@ -1,5 +1,7 @@
 # CLAUDE.md — instruções para qualquer sessão do Claude neste projeto
 
+**Se você está começando uma conversa nova ou em outra máquina, leia `HANDOFF.md` primeiro** — ele diz o que já foi feito, em que etapa estamos e qual é o próximo passo.
+
 Leia `docs/GUIA_DO_PROJETO.md` antes de mexer em qualquer coisa. Ele explica o jogo, a arquitetura, como o vertical slice foi construído, como testar e como continuamos o trabalho.
 
 Regras curtas:
