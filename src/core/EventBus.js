@@ -10,9 +10,10 @@
 //   engagementGain {unit, level, max} (E7)
 //   powerStart {power, team, lane, position, …} · powerImpact {power, team, lane, position, radius, hits, target?, base?} · powerEnd {power} (E8/E9)
 //   baseHit leva strength · baseCritical {team, base} · tretaFinal {overtimeMax} · matchEnd {victory, base|null} · matchCleared (E10)
+//   chaosSpike {level, value} · capitalFull {team} (E11)
 // Reservados para a fase Game Feel (nomes fixos, ainda não emitidos):
 //   unitKnockback {unit, force} · powerStart/powerImpact {power, lane, team, position}
-//   chaosSpike {level} · capitalFull {team}
+//   (nenhum)
 //   engagementGain {unit, level} · stressTest {count}
 // Regra: sistemas de jogo EMITEM; câmera/partículas/áudio/memes/tempo só ESCUTAM.
 export class EventBus {

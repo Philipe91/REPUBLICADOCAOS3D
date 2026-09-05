@@ -73,6 +73,7 @@ export class DebugDraw {
         s += `FPS ${g.fps}\nunits ${g.units.count}  projectiles ${g.effects.projectiles.count}  particles ${g.effects.particles.count}\n`;
         s += `draw calls ${g.renderer.info.render.calls}  tris ${g.renderer.info.render.triangles}\n`;
         s += `match ${g.matchTime.toFixed(1)}s  ramp ${g.baseDamageRamp.toFixed(2)}\n`;
+        s += `chaos ${g.chaos.value.toFixed(0)} (nível ${g.chaos.level})  memes ${g.memes.log.length}\n`;
         for (let l = 0; l < 3; l++) s += `lane ${l + 1}: P${g.units.lanes.player[l].length} / B${g.units.lanes.bot[l].length}\n`;
       }
       if (D.showAIDecisions) { s += '--- BOT ---\n' + g.bot.log.join('\n') + '\n'; if (D.autoPlayer) s += '--- AUTO PLAYER ---\n' + g.autoBot.log.join('\n'); }

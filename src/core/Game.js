@@ -18,6 +18,8 @@ import { HitEffects } from '../effects/HitEffects.js';
 import { SpecialEffects } from '../effects/SpecialEffects.js';
 import { PowerEffects } from '../effects/PowerEffects.js';
 import { MatchEffects } from '../effects/MatchEffects.js';
+import { ChaosScore } from './ChaosScore.js';
+import { MemeDirector } from '../effects/MemeDirector.js';
 import { AudioManager } from '../audio/AudioManager.js';
 import { UnitManager } from '../units/UnitManager.js';
 import { Powers } from '../cards/Powers.js';
@@ -30,8 +32,6 @@ import { DebugDraw } from '../debug/DebugDraw.js';
 import { TimeController } from './TimeController.js';
 import { PerfStats } from '../debug/PerfStats.js';
 import { StressTest } from '../debug/StressTest.js';
-
-const MEMES = ['TRETA!', 'EITA!', 'QUE FASE!', 'NÃO VALE PRINT!', 'TÁ OK?', 'CADÊ O PIX?', 'VAZOU!'];
 
 export class Game {
   constructor(canvas) {
@@ -72,6 +72,8 @@ export class Game {
     this.specialFx = new SpecialEffects(this); // apresentação: só escuta specialStart/End, engagementGain
     this.powerFx = new PowerEffects(this);     // apresentação: powerStart/powerImpact (marcador, sombra, onda…)
     this.matchFx = new MatchEffects(this);     // apresentação: baseCritical, tretaFinal, matchEnd
+    this.chaos = new ChaosScore();             // termômetro do caos (lógica de leitura; emite chaosSpike)
+    this.memes = new MemeDirector(this);       // apresentação: memes contextuais por tabela
     this.time = new TimeController();     // única fonte de escala de tempo (hit-stop, slow-mo, gameSpeed)
     this.perf = new PerfStats(this);
     this.stress = new StressTest(this);
@@ -84,7 +86,6 @@ export class Game {
     this.baseDamageRamp = 1;
     this.kills = { player: 0, bot: 0 };
     this.fps = 0;                          // espelho de perf.fps (DebugDraw / testes)
-    this.memeTimer = 8;
     this.endTimer = 0;
     this.result = null;
     this.clock = new THREE.Clock();
@@ -92,7 +93,6 @@ export class Game {
 
     bus.on('baseDestroyed', ({ base }) => this.onBaseDestroyed(base));
     bus.on('unitDied', ({ unit, killer }) => { if (this.playing) this.kills[unit.team === 'player' ? 'bot' : 'player']++; });
-    bus.on('unitHit', ({ dmg }) => { if (dmg > 80 && Math.random() < 0.15) this.effects.text.meme('TRETA!'); });
 
     window.addEventListener('resize', () => this.onResize());
     this.onResize();
@@ -133,7 +133,6 @@ export class Game {
     this.overtime = 0;
     this.baseDamageRamp = 1;
     this.kills = { player: 0, bot: 0 };
-    this.memeTimer = 8;
     this.hud.show(true);
     this.cardUI.refresh(true);
     this.effects.text.meme('BATALHA PELO PLANALTO!', { color: '#ffd23f', force: true, duration: 1.6 });
@@ -215,11 +214,8 @@ export class Game {
         this.botCtrl.update(dt, regen * Math.max(0.5, Config.game.botDifficulty));
         this.bot.update(dt);
         if (Config.debug.autoPlayer) this.autoBot.update(dt);
-        this.memeTimer -= dt;
-        if (this.memeTimer <= 0 && this.units.count > 4) {
-          this.memeTimer = 14 + Math.random() * 10;
-          this.effects.text.meme(MEMES[Math.floor(Math.random() * MEMES.length)]);
-        }
+        this.chaos.update(dt);
+        this.memes.update(dt);
       } else {
         this.endTimer -= raw;
         if (this.endTimer <= 0 && this.playing) this.showEndScreen();

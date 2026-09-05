@@ -23,6 +23,14 @@ export class MatchEffects {
     bus.on('baseCritical', (e) => this.onCritical(e));
     bus.on('tretaFinal', () => this.onTreta());
     bus.on('matchEnd', (e) => this.onEnd(e));
+    bus.on('chaosSpike', (e) => this.onChaos(e));
+  }
+
+  // caos sobe: tremidinha proporcional e som um pouco mais intenso (a Treta manda mais alto)
+  onChaos({ level }) {
+    const g = this.game, C = Config.chaos;
+    g.camera.addShake(C.cameraShakePerLevel * level);
+    if (!this.treta) g.audio.setIntensity(Math.min(1.15, 1 + C.audioBoostPerLevel * level));
   }
 
   reset() {

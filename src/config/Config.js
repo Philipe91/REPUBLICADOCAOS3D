@@ -15,6 +15,26 @@ export const Config = {
     tretaFinalSpeedMultiplier: 1.25, // velocidade do jogo durante a TRETA FINAL (TimeController.matchMultiplier)
   },
 
+  // ---------- CHAOS SCORE (core/ChaosScore.js) ----------
+  chaos: {
+    weights: { hit: 0.4, heavyHit: 2.5, impact: 0.2, unitDied: 6, powerImpact: 4, special: 8, baseHit: 1.5, baseHeavy: 4, baseCritical: 18, baseDestroyed: 40, tretaFinal: 25 },
+    decayPerSecond: 7,       // pontos que "esfriam" por segundo de jogo
+    max: 120,
+    thresholds: [22, 48, 85], // níveis 1, 2, 3 → chaosSpike ao cruzar para cima
+    spikeCooldown: 2.0,       // s mínimo entre spikes
+    cameraShakePerLevel: 0.12, // shake por nível no spike (MatchEffects)
+    audioBoostPerLevel: 0.05,  // ganho extra por nível (até 1.15, sem Treta)
+  },
+
+  // ---------- MEMES CONTEXTUAIS (effects/MemeDirector.js) ----------
+  memes: {
+    cooldown: 4.0,           // s entre memes do diretor (÷ visual.memeFrequency)
+    chance: 0.7,             // probabilidade base × peso da regra × memeFrequency
+    duration: 1.3,
+    idleEvery: 16,           // s sem nada acontecer → meme aleatório de ambiente
+    maxWait: 2.0,            // s que um candidato espera (cooldown / meme forçado na tela) antes de ser descartado
+  },
+
   // ---------- TRETA FINAL (effects/MatchEffects.js) ----------
   treta: {
     lightMult: 0.62,        // luzes da cena × isto durante a Treta (escurece)

@@ -109,7 +109,8 @@ export class PerfStats {
       + `frame ${this.frameMs.toFixed(1)} ms\n`
       + `calls ${this.drawCalls}  tris ${this.triangles}\n`
       + `units ${c.units}  proj ${c.projectiles}  part ${c.particles}  txt ${c.floatingTexts}\n`
-      + `time ×${Config.game.gameSpeed} slow ${t.scale.toFixed(2)}${t.inHitStop ? ' HIT-STOP' : ''}`;
+      + `time ×${Config.game.gameSpeed} slow ${t.scale.toFixed(2)}${t.inHitStop ? ' HIT-STOP' : ''}\n`
+      + `chaos ${this.game.chaos ? this.game.chaos.value.toFixed(0) : '-'} L${this.game.chaos ? this.game.chaos.level : '-'}`;
     if (this._overlay.textContent !== s) this._overlay.textContent = s;
   }
 }

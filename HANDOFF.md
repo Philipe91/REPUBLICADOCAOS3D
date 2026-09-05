@@ -1,6 +1,6 @@
 # HANDOFF — continuar o projeto em outra máquina / nova conversa
 
-Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E10). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
+Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E11). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
 
 ---
 
@@ -68,7 +68,8 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 | E8 CANETADA completa | ✅ concluída e commitada (05/09, PC de casa) |
 | E9 MOTOCIATA + RECESSO | ✅ concluída e commitada (05/09, PC de casa) |
 | E10 Base, câmera e TRETA FINAL | ✅ concluída e commitada (05/09, PC de casa) |
-| E11..E12 | ⬜ não iniciadas |
+| E11 ChaosScore + memes contextuais | ✅ concluída e commitada (05/09, PC de casa) |
+| E12 Balanceamento e finalização | ⬜ não iniciada |
 
 **Câmera lateral (04/09, PC de casa):** a lógica do jogo NÃO mudou (eixo Z, lanes em x). A câmera fica no lado +X olhando para −X: base do jogador à esquerda, bot à direita, lanes em profundidade. `Config.camera` agora é `cameraSide/cameraDistance/cameraHeight/cameraSideOffset/cameraTarget*/cameraFov` (posição derivada em `CameraController.cameraPosition`). Decoração alta da Arena foi para o lado −X/além das bases. `visual.baseVisualScale` criada (1.0). Harness `test/*.mjs` portado para Windows (`executablePath` do playwright, `shell:true`, `VIEWPORT=`). Medido na RTX 3060: ~200 fps, 570–780 draw calls com 10–19 unidades.
 
@@ -99,7 +100,9 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 
 **E10 (05/09, PC de casa) — base, câmera e TRETA FINAL.** `Base.takeDamage(amount, source, {strength})` reage por força (light/medium/heavy: flash, wobble, entulho) e emite `baseHit {strength}`; ao entrar em ≤ 25% emite `baseCritical`. `effects/MatchEffects.js` (novo) escuta `baseCritical` (alarme + shake + meme + ticks a cada `Config.treta.alarmTickEvery`), `tretaFinal` (vinheta `body.treta` no CSS, luzes × `treta.lightMult`, alerta, som × `treta.audioIntensity` via `AudioManager.setIntensity`), `matchEnd` (slow-mo `time.matchEndSlow*` = 0,45 + 0,15 s ≤ 600 ms, shake, `camera.impulseZoom(endCameraZoom)` + `impulseOffset` curto para a base caída, meme, sons) e `matchStart/matchCleared` (reset). `Game.finish` ficou só com estado + comemoração; `updateMatchPhase` emite `tretaFinal` e põe `time.matchMultiplier = game.tretaFinalSpeedMultiplier` (1.25). Regra de desempate (já existia, agora documentada): `base_damage.tretaFinalMaxOvertime` = 60 s → vence quem tem mais HP na base (empate = jogador). `?dur=N` encurta a partida para testes. Teste: `test/e10.mjs` (headed): 5/5 partidas terminam com Treta e desempate, slow-mo ≈ 600 ms, câmera volta, restart limpa tudo. Observação para a E12: em bot vs bot o bot venceu 5/5 por HP no desempate — investigar viés antes do balanceamento.
 
-**Próximo passo concreto:** E11 (ChaosScore + memes contextuais + intensidade sonora). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
+**E11 (05/09, PC de casa) — ChaosScore + memes.** `core/ChaosScore.js` (sem Three): escuta o bus, soma pesos (`Config.chaos.weights`), decai `decayPerSecond` (tempo de jogo), emite `chaosSpike {level, value}` ao cruzar `thresholds` para cima (cooldown `spikeCooldown`); `game.chaos.value/level`, visível só no overlay de debug/perf. `effects/MemeDirector.js`: tabela declarativa `MEME_RULES` `{on, when, texts, color, priority, weight}`; cooldown `Config.memes.cooldown ÷ visual.memeFrequency`, chance × peso, nunca por cima de meme forçado na tela, candidato espera até `memes.maxWait`, meme de ambiente a cada `idleEvery`; `memeFrequency 0` desliga. Os memes aleatórios e o "TRETA!" por dano saíram do Game. `MatchEffects` escuta `chaosSpike` (shake `chaos.cameraShakePerLevel` × nível, som +`audioBoostPerLevel` × nível fora da Treta). `PlayerController` emite `capitalFull`. Teste: `test/e11.mjs`.
+
+**Próximo passo concreto:** E12 (balanceamento FUN primeiro + validação final: partida completa Player vs Bot, stress 50, tabela de valores). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 

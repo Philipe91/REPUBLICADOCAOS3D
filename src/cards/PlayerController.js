@@ -46,7 +46,7 @@ export class PlayerController {
       if (this.capital >= max) this.regenAcc = 0;
     }
     const full = this.capital >= max;
-    if (full && !this.wasFull && this.team === 'player') this.game.audio.play('capitalFull');
+    if (full && !this.wasFull && this.team === 'player') { this.game.audio.play('capitalFull'); bus.emit('capitalFull', { team: this.team }); }
     this.wasFull = full;
   }
 

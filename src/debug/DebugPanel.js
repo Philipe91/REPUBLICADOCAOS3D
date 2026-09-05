@@ -9,6 +9,8 @@ const RANGES = {
   game: { tretaFinalSpeedMultiplier: [0.5, 3, 0.05], capitalRegen: [0.2, 5, 0.1], startingCapital: [0, 10, 1], maxCapital: [5, 20, 1], matchDuration: [30, 600, 5], botDifficulty: [0.2, 3, 0.1] },
   base: { baseHP: [500, 20000, 100], baseDamageFeedback: [0, 3, 0.1], heavyHitShake: [0, 1, 0.05] },
   treta: { lightMult: [0.2, 1, 0.02], audioIntensity: [0.5, 2, 0.05], alarmTickEvery: [0.5, 6, 0.1] },
+  chaos: { decayPerSecond: [0, 30, 0.5], max: [50, 300, 5], spikeCooldown: [0, 10, 0.1], cameraShakePerLevel: [0, 0.5, 0.01], audioBoostPerLevel: [0, 0.2, 0.01] },
+  memes: { cooldown: [0.5, 15, 0.5], chance: [0, 1, 0.05], duration: [0.5, 3, 0.1], idleEvery: [3, 60, 1], maxWait: [0, 6, 0.1] },
   // câmera lateral: cameraSide é enum e entra fora do loop (ver build())
   camera: { cameraDistance: [8, 70, 0.5], cameraHeight: [0, 45, 0.5], cameraSideOffset: [-30, 30, 0.5], cameraFov: [15, 100, 1], cameraTargetX: [-20, 20, 0.5], cameraTargetY: [-2, 16, 0.1], cameraTargetZ: [-30, 30, 0.5], cameraShakeStrength: [0, 3, 0.1], specialCameraZoom: [0, 15, 0.5], impulseDecay: [2, 20, 0.5], endCameraZoom: [0, 20, 0.5], endCameraTowards: [0, 1, 0.05] },
   lanes: { laneSpacing: [4, 10, 0.5], laneWidth: [2, 8, 0.5], spawnOffset: [0, 10, 0.5], fieldLength: [30, 70, 1] },
@@ -38,7 +40,7 @@ export class DebugPanel {
     gui.add({ copiar: () => this.copyConfig() }, 'copiar').name('📋 COPIAR CONFIG (JSON)');
     gui.add({ reiniciar: () => { this.game.screens.hideAll(); this.game.startMatch(this.game.screens.playerDeck); } }, 'reiniciar').name('🔄 REINICIAR PARTIDA');
 
-    const labels = { game: 'GAME', base: 'BASE', treta: 'TRETA FINAL', camera: 'CÂMERA', lanes: 'LANES', combat: 'COMBATE', bot: 'BOT', visual: 'VISUAL' };
+    const labels = { game: 'GAME', base: 'BASE', treta: 'TRETA FINAL', chaos: 'CHAOS SCORE', memes: 'MEMES', camera: 'CÂMERA', lanes: 'LANES', combat: 'COMBATE', bot: 'BOT', visual: 'VISUAL' };
     for (const section in RANGES) {
       const f = gui.addFolder(labels[section]);
       f.close();
