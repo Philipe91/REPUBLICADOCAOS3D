@@ -39,12 +39,12 @@ await ev(() => new Promise(res => {
   res();
 }));
 
-// ---- 1. arena de teste: capitão (player) x careca "saco de pancada" com HP gigante ----
+// ---- 1. arena de teste: militante (sem especial → cadência limpa) x careca "saco de pancada" com HP gigante ----
 // boneco de treino: HP infinito, stunado (não revida) e sem knockback global (senão o alvo sai do alcance e o golpe vai no vazio)
-const setup = `game.units.clear(); Config.combat.knockbackStrength = 0; const [a] = game.units.spawn('capitao', 'player', 1, { count: 1, z: 1.2 }); const [d] = game.units.spawn('careca', 'bot', 1, { count: 1, z: -0.2 }); d.maxHp = d.hp = 1e9; d.stunned = 1e9; a.maxHp = a.hp = 1e9; window.__a = a; window.__d = d;`;
+const setup = `game.units.clear(); Config.combat.knockbackStrength = 0; const [a] = game.units.spawn('militante', 'player', 1, { count: 1, z: 1.2 }); const [d] = game.units.spawn('careca', 'bot', 1, { count: 1, z: -0.2 }); d.maxHp = d.hp = 1e9; d.stunned = 1e9; a.maxHp = a.hp = 1e9; window.__a = a; window.__d = d;`;
 await ev((s) => eval(s), setup);
 await ev(() => { window.__t0 = game.matchTime; window.__d.hp0 = window.__d.hp; });
-await waitGame(28);
+await waitGame(34);
 const r1 = await ev(() => {
   const L = window.__log; const a = window.__a, d = window.__d;
   const melee = L.impacts.filter(i => i.id === a.id && !i.ranged && i.target !== null);
@@ -65,12 +65,12 @@ const r1 = await ev(() => {
 check('≥ 50 amostras: attackImpact e unitDamaged no MESMO frame', r1.impacts >= 50 && r1.sameFrame === r1.impacts, JSON.stringify(r1));
 check('exatamente 1 dano por ataque', r1.dmg === r1.impacts, `${r1.dmg} danos / ${r1.impacts} impactos`);
 check('DPS efetivo dentro de ±10% do teórico', Math.abs(r1.dps - r1.theo) / r1.theo <= 0.10, `dps=${r1.dps} teórico=${r1.theo}`);
-check('capitão (22 dano) é light (< mediumHitThreshold)', r1.strengths.length === 1 && r1.strengths[0] === 'light', JSON.stringify(r1.strengths));
+check('militante (8 dano) é light (< mediumHitThreshold)', r1.strengths.length === 1 && r1.strengths[0] === 'light', JSON.stringify(r1.strengths));
 
 // ---- 2. fallback: visual que NÃO chama onImpact → dano por timeout, ainda 1 por ataque ----
 await ev((s) => eval(s), setup);
 await ev(() => { window.__a.visual.playAttack = function (w, d) { this.animator.setAnim('attack', { windup: w, duration: d }); }; window.__log.impacts.length = 0; window.__log.damages.length = 0; window.__d.hp0 = window.__d.hp; window.__t0 = game.matchTime; });
-await waitGame(9);
+await waitGame(10);
 const r2 = await ev(() => { const L = window.__log; const a = window.__a; const imp = L.impacts.filter(i => i.id === a.id && i.target !== null).length; const dmg = L.damages.filter(x => x.src === a.id).length; const dps = (window.__d.hp0 - window.__d.hp) / (game.matchTime - window.__t0); return { imp, dmg, dps: +dps.toFixed(2), theo: window.__theo }; });
 check('fallback por timeout: dano continua, 1 por ataque, DPS ±10%', r2.imp >= 12 && r2.dmg === r2.imp && Math.abs(r2.dps - r2.theo) / r2.theo <= 0.10, JSON.stringify(r2));
 

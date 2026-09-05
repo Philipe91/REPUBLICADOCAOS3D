@@ -8,6 +8,7 @@ import { ProceduralCharacterVisual } from './procedural/ProceduralCharacterVisua
 import { GLBCharacterVisual } from './GLBCharacterVisual.js';
 import { assetManager } from './AssetManager.js';
 import { TEAM_COLORS, Config } from '../config/Config.js';
+import { profileFor } from './procedural/Profiles.js';
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -86,7 +87,9 @@ export function buildSpec(type, team) {
 }
 
 export function createCharacterVisual(type, team, scene) {
+  const spec = buildSpec(type, team);
+  spec.profile = profileFor(type);   // personalidade de movimento (Profiles.js) — dados, com jitter por instância
   const glb = assetManager.getModel(type);
-  if (glb) return new GLBCharacterVisual(glb, scene, buildSpec(type, team));
-  return new ProceduralCharacterVisual(buildSpec(type, team), scene);
+  if (glb) return new GLBCharacterVisual(glb, scene, spec);
+  return new ProceduralCharacterVisual(spec, scene);
 }

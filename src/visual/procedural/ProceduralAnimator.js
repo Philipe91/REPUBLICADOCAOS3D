@@ -11,15 +11,23 @@
 // ============================================================
 import * as A from './ProceduralAnimations.js';
 import { death as deathAnim, pickDeath } from './Deaths.js';
+import { GESTURES, recesso as recessoPose } from './Gestures.js';
+import { PROFILES } from './Profiles.js';
 
 const HIT_TIME = 0.3;
 
 export class ProceduralAnimator {
-  constructor(rig) {
+  constructor(rig, profile = null) {
     this.rig = rig;
+    this.profile = profile || PROFILES.default;   // personalidade (só dados) — Profiles.js
     this.anim = 'idle';
     this.animTime = 0;
     this.time = Math.random() * 10;   // fase aleatória: bonecos não sincronizam
+    this.idleTime = 0;                // tempo contínuo em idle (agenda dos gestos)
+    this.gestureT = -1;               // ≥ 0 enquanto um gesto roda
+    this.gestureName = null;
+    this.gesturesPlayed = 0;
+    this.nextGesture = this._scheduleGesture(true);
     this.attackWindup = 0.25;
     this.attackDuration = 0.6;
     this.onImpact = null;
@@ -35,11 +43,17 @@ export class ProceduralAnimator {
     this.deathVariant = null;
   }
 
+  _scheduleGesture(first = false) {
+    const P = this.profile;
+    return (first ? 0.4 + Math.random() * 0.8 : 0.8 + Math.random() * 0.4) * P.gestureEvery;
+  }
+
   setAnim(name, params = {}) {
     if (this.anim === 'death') return;
     if (name === this.anim && (name === 'idle' || name === 'walk')) { if (params.factor) this.walkFactor = params.factor; return; }
     this.anim = name;
     this.animTime = 0;
+    if (name !== 'idle') { this.idleTime = 0; this.gestureT = -1; this.gestureName = null; this.nextGesture = this._scheduleGesture(true); }
     if (name === 'attack') {
       this.attackWindup = params.windup ?? 0.25;
       this.attackDuration = params.duration ?? 0.6;
@@ -62,11 +76,15 @@ export class ProceduralAnimator {
 
     const t = this.animTime;
     const T = this.time;
+    const P = this.profile;
     switch (this.anim) {
-      case 'idle': A.idle(rig, T); break;
-      case 'walk': A.walk(rig, T, this.walkFactor); break;
+      case 'idle':
+        A.idle(rig, T, P);
+        this._updateGesture(dt);
+        break;
+      case 'walk': A.walk(rig, T, this.walkFactor, P); break;
       case 'attack':
-        A.attack(rig, t, this.attackWindup, this.attackDuration);
+        A.attack(rig, t, this.attackWindup, this.attackDuration, P);
         if (!this._impactFired && t >= this.attackWindup) {
           this._impactFired = true;
           const cb = this.onImpact; this.onImpact = null;
@@ -78,7 +96,7 @@ export class ProceduralAnimator {
       case 'stun': A.stun(rig, T); break;
       case 'recesso':
         if (this.recessoVariant === null) this.recessoVariant = Math.floor(Math.random() * 3);
-        A.recesso(rig, T, this.recessoVariant); break;
+        recessoPose(rig, T, this.recessoVariant); break;
       case 'death':
         if (this.deathVariant === null) this.deathVariant = pickDeath('medium');
         deathAnim(rig, t, this.deathVariant); break;
@@ -94,5 +112,20 @@ export class ProceduralAnimator {
       rig.setEmissive(this.flashT > 0 ? this.flashColor : null);
     }
     A.secondary(rig, T, this.anim);
+  }
+
+  // gesto do Profile sobreposto ao idle, a cada gestureEvery s (com variação), por gestureDuration s
+  _updateGesture(dt) {
+    const P = this.profile;
+    const fn = P.gesture && GESTURES[P.gesture];
+    if (!fn) return;
+    this.idleTime += dt;
+    if (this.gestureT < 0) {
+      if (this.idleTime >= this.nextGesture) { this.gestureT = 0; this.gestureName = P.gesture; this.gesturesPlayed++; }
+      else return;
+    }
+    fn(this.rig, this.gestureT, P.gestureDuration);
+    this.gestureT += dt;
+    if (this.gestureT >= P.gestureDuration) { this.gestureT = -1; this.gestureName = null; this.nextGesture = this.idleTime + this._scheduleGesture(); }
   }
 }

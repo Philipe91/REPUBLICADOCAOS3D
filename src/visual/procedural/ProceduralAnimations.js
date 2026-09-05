@@ -4,38 +4,46 @@
 // (o animator chama rig.resetPose() antes). Sem estado, sem alocação por frame.
 //   T = relógio do boneco (fase aleatória por instância; loops: idle/walk/victory/stun/recesso)
 //   t = tempo desde o início da animação atual (one-shots: attack/special/death)
+//   P = Profile do personagem (Profiles.js): tempo, bob, armSwing, rigidity, lean
 // ============================================================
+import { PROFILES } from './Profiles.js';
 
-export function idle(rig, T) {
-  const P = rig.parts;
-  const b = Math.sin(T * 2.2);
-  rig.model.position.y = b * 0.03;
-  P.body.scale.y = 1 + b * 0.02;
-  P.armL.rotation.z = -0.12 + Math.sin(T * 2.2) * 0.05;
-  P.armR.rotation.z = 0.12 - Math.sin(T * 2.2) * 0.05;
-  P.head.rotation.z = Math.sin(T * 1.1) * 0.06;
-  P.head.rotation.y = Math.sin(T * 0.7) * 0.15;
+const DEF = PROFILES.default;
+
+export function idle(rig, T, P = DEF) {
+  const R = rig.parts;
+  const T2 = T * P.tempo;
+  const b = Math.sin(T2 * 2.2);
+  const loose = 1 - P.rigidity * 0.7;          // rígido balança menos braços/cabeça
+  rig.model.position.y = b * 0.03 * P.bob;
+  R.body.scale.y = 1 + b * 0.02 * P.bob;
+  R.armL.rotation.z = -0.12 + Math.sin(T2 * 2.2) * 0.05 * loose;
+  R.armR.rotation.z = 0.12 - Math.sin(T2 * 2.2) * 0.05 * loose;
+  R.head.rotation.z = Math.sin(T2 * 1.1) * 0.06 * loose;
+  R.head.rotation.y = Math.sin(T2 * 0.7) * 0.15 * loose;
 }
 
-export function walk(rig, T, factor = 1) {
-  const P = rig.parts;
-  const f = 9 * Math.max(0.3, factor);
+export function walk(rig, T, factor = 1, P = DEF) {
+  const R = rig.parts;
+  const f = 9 * Math.max(0.3, factor) * P.tempo;
   const s = Math.sin(T * f);
   const c = Math.cos(T * f);
-  const amp = rig.jurassic ? 0.5 : 0.7;
-  P.legL.rotation.x = s * amp; P.legR.rotation.x = -s * amp;
-  P.armL.rotation.x = -s * amp * 0.9; P.armR.rotation.x = s * amp * 0.9;
-  P.armL.rotation.z = -0.15; P.armR.rotation.z = 0.15;
-  rig.model.position.y = Math.abs(c) * 0.08;
-  P.body.rotation.x = 0.12 + (rig.rest.body.rot.x);
-  P.body.rotation.z = s * 0.06;
-  P.head.rotation.z = -s * 0.08;
-  P.head.rotation.x = -0.08;
+  const amp = (rig.jurassic ? 0.5 : 0.7) * (0.75 + 0.25 * P.bob);   // passo pesado = perna mais alta
+  const loose = 1 - P.rigidity * 0.5;
+  R.legL.rotation.x = s * amp; R.legR.rotation.x = -s * amp;
+  R.armL.rotation.x = -s * amp * 0.9 * P.armSwing; R.armR.rotation.x = s * amp * 0.9 * P.armSwing;
+  R.armL.rotation.z = -0.15; R.armR.rotation.z = 0.15;
+  rig.model.position.y = Math.abs(c) * 0.08 * P.bob;
+  R.body.rotation.x = 0.12 * P.lean + (rig.rest.body.rot.x);
+  R.body.rotation.z = s * 0.06 * loose;
+  R.head.rotation.z = -s * 0.08 * loose;
+  R.head.rotation.x = -0.08 * P.lean;
 }
 
 // antecipação (recua e levanta o braço) → golpe (avança rápido, 0.14 s) → recuperação
-export function attack(rig, t, windup = 0.25, duration = 0.6) {
-  const P = rig.parts;
+// `lean` do Profile exagera/contém a inclinação; o TIMING (windup/duration) vem da Unit.
+export function attack(rig, t, windup = 0.25, duration = 0.6, P = DEF) {
+  const R = rig.parts;
   const w = windup, d = duration;
   let lean = 0, armX = 0, lunge = 0, armZ = 0;
   if (t < w) {
@@ -51,13 +59,14 @@ export function attack(rig, t, windup = 0.25, duration = 0.6) {
     const e = 1 - Math.pow(1 - p, 2);
     lean = 0.65 * (1 - e); armX = 1.0 * (1 - e); lunge = 0.43 * (1 - e);
   }
-  P.body.rotation.x = lean + rig.rest.body.rot.x;
-  P.armR.rotation.x = armX; P.armR.rotation.z = armZ;
-  P.armL.rotation.x = -armX * 0.3; P.armL.rotation.z = -0.3;
+  lean *= P.lean;
+  R.body.rotation.x = lean + rig.rest.body.rot.x;
+  R.armR.rotation.x = armX; R.armR.rotation.z = armZ;
+  R.armL.rotation.x = -armX * 0.3; R.armL.rotation.z = -0.3;
   rig.model.position.z = lunge;
-  P.legL.rotation.x = -lunge * 0.8; P.legR.rotation.x = lunge * 0.8;
-  P.head.rotation.x = -lean * 0.4;
-  if (P.weapon) P.weapon.rotation.x = -armX * 0.2;
+  R.legL.rotation.x = -lunge * 0.8; R.legR.rotation.x = lunge * 0.8;
+  R.head.rotation.x = -lean * 0.4;
+  if (R.weapon) R.weapon.rotation.x = -armX * 0.2;
 }
 
 export function special(rig, t, kind = 'default', duration = 1) {
@@ -126,24 +135,7 @@ export function stun(rig, T) {
   P.armL.rotation.x = 0.3; P.armR.rotation.x = 0.3;
 }
 
-// variantes: 0 olhar celular · 1 coçar a cabeça · 2 sentar (escolhida por instância)
-export function recesso(rig, T, variant = 0) {
-  const P = rig.parts;
-  if (variant === 0) {
-    P.armR.rotation.x = -1.7; P.armR.rotation.z = -0.4; P.head.rotation.x = 0.55;
-    P.head.rotation.z = Math.sin(T * 2) * 0.05;
-  } else if (variant === 1) {
-    P.armR.rotation.x = -2.9; P.armR.rotation.z = 0.35 + Math.sin(T * 14) * 0.15; P.head.rotation.z = -0.25;
-    P.head.rotation.x = -0.1;
-  } else {
-    rig.model.position.y = -rig.legH * 0.75;
-    P.legL.rotation.x = -1.5; P.legR.rotation.x = -1.5;
-    P.body.rotation.x = 0.1; P.armL.rotation.x = -0.5; P.armR.rotation.x = -0.5;
-    P.head.rotation.y = Math.sin(T * 1.5) * 0.3;
-  }
-}
-
-// mortes: ver Deaths.js (5 variações escolhidas pela força do golpe)
+// recesso e gestos de idle: ver Gestures.js · mortes: ver Deaths.js
 
 // reação de dano SOBREPOSTA à animação corrente (p = 1 → 0 ao longo de 0.3 s)
 export function hitOverlay(rig, p, strength = 1) {

@@ -16,7 +16,7 @@ export class ProceduralCharacterVisual extends CharacterVisual {
   constructor(spec, scene) {
     super();
     this.rig = new ProceduralRig(spec, Config.visual.headScale);
-    this.animator = new ProceduralAnimator(this.rig);
+    this.animator = new ProceduralAnimator(this.rig, spec.profile);   // personalidade (Profiles.js, mesclada pela CharacterFactory)
     this.object3d = this.rig.root;
     this.baseScale = MODEL_SCALE * (spec.scale ?? 1);
     this.extraScale = 1;
