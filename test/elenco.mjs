@@ -17,6 +17,7 @@ const waitGame = (sec) => ev((sec) => new Promise(res => { const t0 = game.match
 
 await page.goto('http://localhost:4191/');
 await page.waitForTimeout(1200);
+await ev(() => { assetManager.enabled = false; });   // estes testes cobrem o visual PROCEDURAL e a lógica
 const deck = await ev(() => { document.getElementById('btn-deck').click(); const n = document.querySelectorAll('#deck-grid .card').length; const ids = [...document.querySelectorAll('#deck-grid .card')].map(e => e.dataset.id); document.getElementById('btn-deck-back').click(); return { n, ids }; });
 check('deck builder mostra as 7 cartas novas (19 no total)', deck.n === 19 && ['agroboy', 'coach', 'pastor', 'pneus', 'maconheiro', 'musico', 'mascote'].every(i => deck.ids.includes(i)), JSON.stringify(deck.ids));
 

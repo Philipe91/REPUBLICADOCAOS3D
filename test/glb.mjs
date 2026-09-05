@@ -23,7 +23,7 @@ const r = await ev(() => {
   game.units.clear();
   const [p] = game.units.spawn('militante', 'player', 1, { count: 1, z: 6 });
   const [b] = game.units.spawn('militante', 'bot', 1, { count: 1, z: -6 });
-  const [c] = game.units.spawn('tiozap', 'player', 0, { count: 1, z: 6 });
+  assetManager.enabled = false; const [c] = game.units.spawn('tiozap', 'player', 0, { count: 1, z: 6 }); assetManager.enabled = true;   // referência procedural
   const v = p.visual;
   const team = v.materials.filter(m => /^TEAM/i.test(m.name)).map(m => m.color.getHex());
   const teamB = b.visual.materials.filter(m => /^TEAM/i.test(m.name)).map(m => m.color.getHex());
@@ -32,9 +32,9 @@ const r = await ev(() => {
   const emis = v.materials[0].emissive.getHex();
   return { isGlb: !!v.mixer, capProc: !c.visual.mixer, clips: Object.keys(v.clips).sort(), team: [...new Set(team)], teamB: [...new Set(teamB)], shared, emis: emis.toString(16), height: +v.height.toFixed(2), procHeight: +(c.visual.height).toFixed(2) };
 });
-check('militante usa GLB; tiozap continua procedural', r.isGlb && r.capProc);
-const five = await ev(() => { game.units.clear(); const out = {}; for (const t of ['militante', 'barbudo', 'capitao', 'careca', 'dino']) { const [u] = game.units.spawn(t, 'bot', 0, { count: 1, z: -5 }); out[t] = { glb: !!u.visual.mixer, h: +u.visual.height.toFixed(2), jur: u.visual.jurNodes ? u.visual.jurNodes.length : 0 }; } game.units.clear(); return out; });
-check('barbudo, capitão, careca e dino também são GLB (alturas plausíveis)', ['barbudo', 'capitao', 'careca', 'dino'].every(t => five[t].glb && five[t].h > 1.8 && five[t].h < 5.2), JSON.stringify(five));
+check('militante usa GLB; procedural continua disponível com assetManager.enabled = false', r.isGlb && r.capProc);
+const five = await ev(() => { game.units.clear(); const out = {}; for (const t of ['militante', 'barbudo', 'capitao', 'careca', 'dino', 'tiozap', 'assessor', 'influencer', 'fiel', 'agroboy', 'coach', 'pastor', 'pneus', 'maconheiro', 'musico', 'mascote']) { const [u] = game.units.spawn(t, 'bot', 0, { count: 1, z: -5 }); out[t] = { glb: !!u.visual.mixer, h: +u.visual.height.toFixed(2), jur: u.visual.jurNodes ? u.visual.jurNodes.length : 0 }; } game.units.clear(); return out; });
+check('todos os 16 tipos são GLB (alturas plausíveis)', Object.keys(five).length === 16 && Object.values(five).every(v => v.glb && v.h > 1.5 && v.h < 5.2), JSON.stringify(five));
 const jur = await ev(() => { game.units.clear(); const [d] = game.units.spawn('dino', 'player', 1, { count: 1, z: 2 }); const before = { vis: d.visual.jurNodes.filter(o => o.visible).length, scale: +d.visual.object3d.scale.x.toFixed(3), skin: d.visual.materials.find(m => /^SKIN_/i.test(m.name)).color.getHex() }; d.hp = d.maxHp * 0.4; d.behavior.onDamaged(d); const after = { vis: d.visual.jurNodes.filter(o => o.visible).length, total: d.visual.jurNodes.length, scale: +d.visual.object3d.scale.x.toFixed(3), skin: d.visual.materials.find(m => /^SKIN_/i.test(m.name)).color.getHex(), state: d.state }; game.units.clear(); return { before, after }; });
 check('Dino GLB: MODO JURÁSSICO mostra cauda/crista/dentes, pele verde e cresce 1.35×', jur.before.vis === 0 && jur.after.vis === jur.after.total && jur.after.total >= 5 && jur.after.skin === 0x3f8f3a && Math.abs(jur.after.scale / jur.before.scale - 1.35) < 0.01 && jur.after.state === 'SPECIAL', JSON.stringify(jur));
 check('clipes esperados presentes', ['attack', 'death', 'hit', 'idle', 'special', 'stun', 'victory', 'walk'].every(k => r.clips.includes(k)), JSON.stringify(r.clips));

@@ -1,7 +1,7 @@
 // ============================================================
-// AssetManager — preparado para carregar /models/<tipo>.glb no futuro.
+// AssetManager — carrega /models/<tipo>.glb (gerados por tools/blender/character.py).
 // Se o arquivo não existir (ou falhar), o jogo usa o visual procedural.
-// Nenhuma dependência desses arquivos existe hoje.
+// `enabled = false` força o procedural (testes/debug).
 // ============================================================
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -10,10 +10,18 @@ export const MODEL_PATHS = {
   capitao: 'models/capitao.glb',
   careca: 'models/careca.glb',
   dino: 'models/dino.glb',
-  tiozap: 'models/tio_zap.glb',
+  tiozap: 'models/tiozap.glb',
   assessor: 'models/assessor.glb',
   influencer: 'models/influencer.glb',
   militante: 'models/militante.glb',
+  fiel: 'models/fiel.glb',
+  agroboy: 'models/agroboy.glb',
+  coach: 'models/coach.glb',
+  pastor: 'models/pastor.glb',
+  pneus: 'models/pneus.glb',
+  maconheiro: 'models/maconheiro.glb',
+  musico: 'models/musico.glb',
+  mascote: 'models/mascote.glb',
 };
 
 class AssetManager {

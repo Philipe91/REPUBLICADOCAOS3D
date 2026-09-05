@@ -18,6 +18,7 @@ const waitGame = (sec) => ev((sec) => new Promise(res => { const t0 = game.match
 
 await page.goto('http://localhost:4181/?autostart=1&speed=1');   // speed 1: no headless cada frame vale 50 ms de jogo; com 4 a cadência quantiza
 await page.waitForTimeout(1200);
+await ev(() => { assetManager.enabled = false; });   // estes testes cobrem o visual PROCEDURAL e a lógica
 await ev(() => {
   Config.bot.botAggressiveness = 0; Config.bot.botDefenseBias = 0; Config.bot.botRandomness = 0; Config.debug.autoPlayer = false;
   Config.game.capitalRegen = 100; game.botCtrl.capital = 0; game.player.capital = 0;

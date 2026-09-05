@@ -15,6 +15,7 @@ const ev = (fn, arg) => page.evaluate(fn, arg);
 
 await page.goto('http://localhost:4180/?autostart=1&speed=1');
 await page.waitForTimeout(1200);
+await ev(() => { assetManager.enabled = false; });   // estes testes cobrem o visual PROCEDURAL e a lógica
 await ev(() => { Config.bot.botAggressiveness = 0; Config.bot.botDefenseBias = 0; Config.bot.botRandomness = 0; Config.debug.autoPlayer = false; Config.game.capitalRegen = 100; game.botCtrl.capital = 0; });
 
 // 1. spawn de cada tipo nos dois times; anel = unidades vivas; braçadeira; fundo da barra por time

@@ -21,6 +21,7 @@ window.game = game;
 window.Config = Config;
 window.bus = bus;   // testes automáticos escutam eventos por aqui
 window.debugPanel = panel;
+window.assetManager = assetManager;   // testes: assetManager.enabled = false força o visual procedural
 
 // Suporte a parâmetros de URL para testes: ?auto=1&speed=4&autostart=1
 const params = new URLSearchParams(location.search);
