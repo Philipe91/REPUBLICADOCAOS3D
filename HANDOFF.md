@@ -1,6 +1,6 @@
 # HANDOFF — continuar o projeto em outra máquina / nova conversa
 
-Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E11). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
+Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E12 — fase Game Feel completa). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
 
 ---
 
@@ -69,7 +69,7 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 | E9 MOTOCIATA + RECESSO | ✅ concluída e commitada (05/09, PC de casa) |
 | E10 Base, câmera e TRETA FINAL | ✅ concluída e commitada (05/09, PC de casa) |
 | E11 ChaosScore + memes contextuais | ✅ concluída e commitada (05/09, PC de casa) |
-| E12 Balanceamento e finalização | ⬜ não iniciada |
+| E12 Balanceamento e finalização | ✅ concluída e commitada (05/09, PC de casa) — falta o playtest MANUAL do Philipe |
 
 **Câmera lateral (04/09, PC de casa):** a lógica do jogo NÃO mudou (eixo Z, lanes em x). A câmera fica no lado +X olhando para −X: base do jogador à esquerda, bot à direita, lanes em profundidade. `Config.camera` agora é `cameraSide/cameraDistance/cameraHeight/cameraSideOffset/cameraTarget*/cameraFov` (posição derivada em `CameraController.cameraPosition`). Decoração alta da Arena foi para o lado −X/além das bases. `visual.baseVisualScale` criada (1.0). Harness `test/*.mjs` portado para Windows (`executablePath` do playwright, `shell:true`, `VIEWPORT=`). Medido na RTX 3060: ~200 fps, 570–780 draw calls com 10–19 unidades.
 
@@ -102,7 +102,18 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 
 **E11 (05/09, PC de casa) — ChaosScore + memes.** `core/ChaosScore.js` (sem Three): escuta o bus, soma pesos (`Config.chaos.weights`), decai `decayPerSecond` (tempo de jogo), emite `chaosSpike {level, value}` ao cruzar `thresholds` para cima (cooldown `spikeCooldown`); `game.chaos.value/level`, visível só no overlay de debug/perf. `effects/MemeDirector.js`: tabela declarativa `MEME_RULES` `{on, when, texts, color, priority, weight}`; cooldown `Config.memes.cooldown ÷ visual.memeFrequency`, chance × peso, nunca por cima de meme forçado na tela, candidato espera até `memes.maxWait`, meme de ambiente a cada `idleEvery`; `memeFrequency 0` desliga. Os memes aleatórios e o "TRETA!" por dano saíram do Game. `MatchEffects` escuta `chaosSpike` (shake `chaos.cameraShakePerLevel` × nível, som +`audioBoostPerLevel` × nível fora da Treta). `PlayerController` emite `capitalFull`. Teste: `test/e11.mjs`.
 
-**Próximo passo concreto:** E12 (balanceamento FUN primeiro + validação final: partida completa Player vs Bot, stress 50, tabela de valores). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
+**E12 (05/09, PC de casa) — balanceamento + validação.** `test/e12.mjs` (headed; aceita overrides de Config e `quick`): (A) partidas ESPELHADAS com o mesmo deck → 3/6, sem viés estrutural; (B) decks padrão → com Motociata 70 o deck do bot (Dino + Motociata) vencia 6/6 e 8/8 (base do bot ~intacta); Dino mais fraco + Barbudo mais forte não mudou nada (0/8); Canetada mais forte sozinha 1/8; **Motociata é o desequilíbrio**: dano 30 → 3/8, 40 → 4/8 e 2/6, 45 → 1/8. Única mudança de Config da E12: `powers.motociata.damage` 70 → **40** (vale para a carta e para o especial do Capitão). (C) stress 50: 120 fps médio, mínimo 39, **1445 draw calls**, 140k tris, 42 unidades. (D) partida completa auto vs bot (180 s) termina sem erro a 143 fps. Playtest manual: NÃO feito (sessão autônoma) — fica para o Philipe.
+
+**Valores de Config alterados na fase (E1–E12), com motivo:**
+- `combat.hitStopDuration` 0.06 → 0.045 (E1, pedido); `combat.mediumHitThreshold` 25, `impactTimeout` 0.15, `hitFlashDuration` 0.08, `deathKnockbackMultiplier` 1.0, `smallUnitDeathFlyMult` 1.6 (E5, novos); knockback por força × 0.6 / 1.0 / 1.2 (E5).
+- `time.*` (E1/E7/E10, novos): hit-stop budget 0.3/s, slow-mo 0.35/0.25/0.15, especial 0.45/0.2/0.15, fim de partida 0.25/0.45/0.15 (≤ 600 ms).
+- `camera.specialCameraZoom` 5, `impulseDecay` 7, `endCameraZoom` 8, `endCameraTowards` 0.35 (E7/E10, novos).
+- `visual.spawnEffectScale` 1, `teamRingOpacity` 0.6, `showUnitNameOnSpawn` (E4); `ui.*` (E3); `treta.*`, `chaos.*`, `memes.*` (E10/E11); `game.tretaFinalSpeedMultiplier` 1.25 (E10); `units.dino.jurassicDuration` 1.1 / `jurassicInvulnerable` 1 (E7); `powers.canetada` warnTime 0.45 / fallTime 0.45 / hitStop 0.07 / shake 0.9 (E8); `powers.motociata` shake/hitShake, `recesso.endSignal` 0.35 (E9).
+- `powers.motociata.damage` 70 → 40 (E12, balanceamento medido).
+
+**Recomendação de performance (não feita, só medida):** 1445 draw calls com 42–50 unidades vêm dos ~30 meshes por boneco procedural. Se o alvo for < 1000 calls com 50 unidades, o próximo passo é InstancedMesh para os militantes (horda) — decisão do Philipe.
+
+**Próximo passo concreto:** Philipe joga uma partida manual (Player vs Bot), ajusta pelo lil-gui o que sentir (Motociata, Capital, câmera) e cola o COPIAR CONFIG; depois decidir InstancedMesh e o início dos modelos Blender (a interface CharacterVisual/GLBCharacterVisual já aceita playAttack onImpact e playDeath por força). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 

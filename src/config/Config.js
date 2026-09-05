@@ -174,7 +174,7 @@ export const Config = {
   // ---------- PODERES (cartas instantâneas) ----------
   powers: {
     canetada: { cost: 4, damage: 220, radius: 3.5, knockback: 1.5, warnTime: 0.45, fallTime: 0.45, hitStop: 0.07, shake: 0.9 },   // aviso ≥ 0,4 s; total ≤ 1,5 s
-    motociata: { cost: 4, damage: 70, knockback: 2.5, motoCount: 3, shake: 0.35, hitShake: 0.12 },   // shake inicial e por atropelo (sem hit-stop: 3 motos)
+    motociata: { cost: 4, damage: 40, knockback: 2.5, motoCount: 3, shake: 0.35, hitShake: 0.12 },   // E12: 70 → 40 (com 70 o deck do bot vencia 6/6; com 40, 4/8). Vale também para o especial do Capitão
     recesso:   { cost: 3, duration: 2.2, endSignal: 0.35 },   // endSignal: s antes do fim em que toca o sinal de retomada
     pesquisa:  { cost: 2, duration: 8, bonus: 0.3 },
   },
