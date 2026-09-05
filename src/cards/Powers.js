@@ -69,9 +69,8 @@ export class Powers {
     for (let i = 0; i < n; i++) {
       this.pending.push({ t: i * 0.22, fn: () => this._spawnMoto(team, lane, startZ, damage ?? P.damage, knockback ?? P.knockback, i) });
     }
-    g.effects.text.meme('MOTOCIATA!', { color: '#ffffff', force: true });
-    g.audio.play('moto');
-    g.camera.addShake(0.5);
+    // apresentação (meme, som crescendo, shake, fumaça/rastro) em PowerEffects
+    bus.emit('powerStart', { power: 'motociata', team, lane, position: new THREE.Vector3(g.arena.laneX(lane), 0, startZ), count: n });
   }
 
   _spawnMoto(team, lane, z, damage, knockback, idx) {
@@ -84,7 +83,7 @@ export class Powers {
     m.mesh.rotation.y = dir < 0 ? Math.PI : 0;
     m.mesh.visible = true;
     m.body.material = mat(TEAM_COLORS[team]);
-    Object.assign(m, { team, lane, dir, damage, knockback, hitSet: new Set(), t: 0, smoke: 0, alive: true });
+    Object.assign(m, { team, lane, dir, damage, knockback, hitSet: new Set(), t: 0, alive: true });
     this.motos.push(m);
   }
 
@@ -107,17 +106,21 @@ export class Powers {
   }
 
   // ---------------- RECESSO ----------------
+  // Todo mundo para por `duration` s (Unit.frozen); o alvo NÃO é perdido — ao voltar, a Unit
+  // re-checa o alvo e retoma o ataque. Sinal sonoro `endSignal` s antes do fim (powerEnd).
   recesso(team) {
     const P = Config.powers.recesso;
     const g = this.game;
+    let n = 0;
     for (const u of g.units.units) {
       if (!u.alive) continue;
       u.frozen = P.duration;
       u.visual.playRecesso(true);
+      n++;
     }
     this.recessoTimer = P.duration;
-    g.effects.text.meme('RECESSO!', { color: '#ffe9a8', force: true, duration: P.duration });
-    g.audio.play('special');
+    this.recessoSignalDone = false;
+    bus.emit('powerStart', { power: 'recesso', team, duration: P.duration, count: n });
   }
 
   // ---------------- PESQUISA ----------------
@@ -153,7 +156,10 @@ export class Powers {
       p.t -= dt;
       if (p.t <= 0) { p.fn(); this.pending.splice(i, 1); }
     }
-    if (this.recessoTimer > 0) this.recessoTimer -= dt;
+    if (this.recessoTimer > 0) {
+      this.recessoTimer -= dt;
+      if (!this.recessoSignalDone && this.recessoTimer <= Config.powers.recesso.endSignal) { this.recessoSignalDone = true; bus.emit('powerEnd', { power: 'recesso', remaining: Math.max(0, this.recessoTimer) }); }
+    }
 
     // canetas: aviso → queda → impacto → fincada → sobe e some (≤ 1,5 s no total)
     for (let i = this.pens.length - 1; i >= 0; i--) {
@@ -182,28 +188,24 @@ export class Powers {
       m.mesh.position.z += m.dir * speed * dt;
       m.mesh.rotation.z = Math.sin(m.t * 30) * 0.06;
       for (const w of m.wheels) w.rotation.x += dt * 30;
-      m.smoke -= dt;
-      if (m.smoke <= 0) {
-        m.smoke = 0.05;
-        g.effects.particles.burst(m.mesh.position.clone().setY(0.3), 1, { color: 0x999999, speed: 0.8, size: 0.5, gravity: -1.2, life: 0.8, smoke: true });
-      }
-      // atropela inimigos
+      // atropela inimigos (dano heavy: knockback + reação forte; sem hit-stop — são 3 motos)
       const enemies = g.units.enemiesInLane(m.team, m.lane);
       for (const e of enemies) {
         if (!e.alive || m.hitSet.has(e.id)) continue;
         const dz = Math.abs(e.pos.z - m.mesh.position.z), dx = Math.abs(e.pos.x - m.mesh.position.x);
         if (dz < 1.2 && dx < 1.3) {
           m.hitSet.add(e.id);
-          e.takeDamage(m.damage * Config.combat.globalDamageMultiplier, { pos: m.mesh.position, dir: m.dir, knockback: m.knockback * Config.combat.knockbackStrength }, { knockback: m.knockback * Config.combat.knockbackStrength, big: true });
+          e.takeDamage(m.damage * Config.combat.globalDamageMultiplier, { pos: m.mesh.position, dir: m.dir, knockback: m.knockback * Config.combat.knockbackStrength }, { knockback: m.knockback * Config.combat.knockbackStrength, strength: 'heavy' });
           e.kb.y = 0;
+          bus.emit('powerImpact', { power: 'motociata', team: m.team, lane: m.lane, position: m.mesh.position.clone(), radius: 1.2, hits: 1, target: e });
         }
       }
       // chega na base inimiga
       const base = g.enemyBase(m.team);
       if ((m.mesh.position.z - base.front) * m.dir > -0.5) {
-        if (!base.destroyed) { base.takeDamage(m.damage * 0.6 * g.baseDamageRamp, null); g.audio.play('baseHit'); }
-        g.effects.particles.burst(m.mesh.position.clone().setY(0.6), 12, { color: 0x999999, speed: 4, size: 0.3, gravity: 3, smoke: true, life: 1 });
-        m.mesh.visible = false; this.motoPool.push(m); this.motos.splice(i, 1);
+        if (!base.destroyed) { base.takeDamage(m.damage * 0.6 * g.baseDamageRamp, null); }
+        bus.emit('powerImpact', { power: 'motociata', team: m.team, lane: m.lane, position: m.mesh.position.clone(), radius: 1.5, hits: 0, base: true });
+        m.alive = false; m.mesh.visible = false; this.motoPool.push(m); this.motos.splice(i, 1);
       }
     }
   }
@@ -231,9 +233,10 @@ export class Powers {
   clear() {
     for (const p of this.pens) { p.active = false; p.mesh.visible = false; this.penPool.push(p); }
     this.pens.length = 0;
-    for (const m of this.motos) { m.mesh.visible = false; this.motoPool.push(m); }
+    for (const m of this.motos) { m.alive = false; m.mesh.visible = false; this.motoPool.push(m); }
     this.motos.length = 0;
     this.pending.length = 0;
     this.recessoTimer = 0;
+    this.recessoSignalDone = true;
   }
 }

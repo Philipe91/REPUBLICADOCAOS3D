@@ -94,9 +94,13 @@ export class ProceduralAnimator {
       case 'special': A.special(rig, t, this.specialKind, this.specialDuration); break;
       case 'victory': A.victory(rig, T); break;
       case 'stun': A.stun(rig, T); break;
-      case 'recesso':
-        if (this.recessoVariant === null) this.recessoVariant = Math.floor(Math.random() * 3);
-        recessoPose(rig, T, this.recessoVariant); break;
+      case 'recesso': {
+        // 0 celular · 1 coçar · 2 sentar · 3 gesto do perfil em loop (Gestures.js)
+        if (this.recessoVariant === null) this.recessoVariant = Math.floor(Math.random() * (P.gesture && GESTURES[P.gesture] ? 4 : 3));
+        if (this.recessoVariant === 3) { A.idle(rig, T, P); const d = Math.max(0.5, P.gestureDuration); GESTURES[P.gesture](rig, t % d, d); }
+        else recessoPose(rig, T, this.recessoVariant);
+        break;
+      }
       case 'death':
         if (this.deathVariant === null) this.deathVariant = pickDeath('medium');
         deathAnim(rig, t, this.deathVariant); break;

@@ -1,6 +1,6 @@
 # HANDOFF — continuar o projeto em outra máquina / nova conversa
 
-Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E8). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
+Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E9). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
 
 ---
 
@@ -66,7 +66,8 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 | E6 Personalidade por personagem | ✅ concluída e commitada (05/09, PC de casa) |
 | E7 Especiais (Jurássico, Suspenso, Engajamento) | ✅ concluída e commitada (05/09, PC de casa) |
 | E8 CANETADA completa | ✅ concluída e commitada (05/09, PC de casa) |
-| E9..E12 | ⬜ não iniciadas |
+| E9 MOTOCIATA + RECESSO | ✅ concluída e commitada (05/09, PC de casa) |
+| E10..E12 | ⬜ não iniciadas |
 
 **Câmera lateral (04/09, PC de casa):** a lógica do jogo NÃO mudou (eixo Z, lanes em x). A câmera fica no lado +X olhando para −X: base do jogador à esquerda, bot à direita, lanes em profundidade. `Config.camera` agora é `cameraSide/cameraDistance/cameraHeight/cameraSideOffset/cameraTarget*/cameraFov` (posição derivada em `CameraController.cameraPosition`). Decoração alta da Arena foi para o lado −X/além das bases. `visual.baseVisualScale` criada (1.0). Harness `test/*.mjs` portado para Windows (`executablePath` do playwright, `shell:true`, `VIEWPORT=`). Medido na RTX 3060: ~200 fps, 570–780 draw calls com 10–19 unidades.
 
@@ -93,7 +94,9 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 
 **E8 (05/09, PC de casa) — CANETADA.** `Powers.canetada` virou só lógica com fases: `warn` (`Config.powers.canetada.warnTime` 0,45 s, caneta invisível) → `fall` (`fallTime` 0,45 s) → impacto exato (`_penImpact`: dano em área `strength: 'special'` + base, emite `powerImpact {power, team, lane, position, radius, hits}`) → fincada 0,25 s → sobe e some (total 1,5 s). `powerStart` é emitido no uso. `effects/PowerEffects.js` (novo): marcador pulsante no chão durante o aviso (≥ 0,4 s legível), sombra crescendo sob a caneta na queda, e no impacto onda + tinta + dourado + papéis + texto + shake (`shake`) + hit-stop (`hitStop`, teto 80 ms) + sons; `update(visualDt)` chamado pelo Game; pools de marcador/sombra. Teste: `test/e8.mjs`; fases em `test/shots/e8/`. A geometria da caneta continua em Powers (não migrou para Assets.js).
 
-**Próximo passo concreto:** E9 (MOTOCIATA + RECESSO com Gestures). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
+**E9 (05/09, PC de casa) — MOTOCIATA + RECESSO.** `Powers.motociata` emite `powerStart` e, por atropelo, `powerImpact {target}` (dano `heavy`, 1 por moto/inimigo) e `powerImpact {base:true}` na chegada; fumaça/som/shake saíram para `PowerEffects` (ronco crescendo `motoRev`, shake `Config.powers.motociata.shake`, faíscas + `hitShake` por atropelo, fumaça baixa e marca de pneu por frame lendo `powers.motos`). `Powers.recesso` emite `powerStart {duration}` e `powerEnd` `endSignal` s antes do fim (sinal `recessoEnd` + "VOLTOU!"); o alvo não é perdido: ao descongelar a Unit volta a MOVING → re-checa → ataca o mesmo alvo. Recesso ganhou a variante 3 = gesto do perfil em loop (Gestures). Teste: `test/e9.mjs`; capturas em `test/shots/e9/`.
+
+**Próximo passo concreto:** E10 (base, câmera e TRETA FINAL). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 

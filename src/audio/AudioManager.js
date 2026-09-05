@@ -139,6 +139,14 @@ export class AudioManager {
       case 'moto':
         for (let i = 0; i < 6; i++) this._tone({ freq: 80 + i * 25, freq2: 60 + i * 40, type: 'sawtooth', dur: 0.15, gain: 0.2, delay: i * 0.1 });
         break;
+      case 'motoRev':   // ronco crescendo: 6 pulsos subindo de tom, depois o 'moto' clássico
+        for (let i = 0; i < 6; i++) this._tone({ freq: 60 + i * 30, freq2: 90 + i * 55, type: 'sawtooth', dur: 0.14, gain: 0.16 + i * 0.03, delay: i * 0.09 });
+        for (let i = 0; i < 6; i++) this._tone({ freq: 80 + i * 25, freq2: 60 + i * 40, type: 'sawtooth', dur: 0.15, gain: 0.2, delay: 0.55 + i * 0.1 });
+        break;
+      case 'recessoEnd':   // sininho de volta ao trabalho
+        this._tone({ freq: 880, type: 'sine', dur: 0.12, gain: 0.18 });
+        this._tone({ freq: 1320, type: 'sine', dur: 0.18, gain: 0.18, delay: 0.14 });
+        break;
       case 'canetada':
         this._tone({ freq: 900, freq2: 100, type: 'sawtooth', dur: 0.5, gain: 0.3 });
         this._noise({ dur: 0.3, gain: 0.3, lp: 800, delay: 0.45 });

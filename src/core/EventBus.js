@@ -8,7 +8,7 @@
 //   baseHit {base, amount, source} · baseStage {base, stage} · baseDestroyed {base}
 //   specialStart {unit, type, duration, target|null} · specialEnd {unit, type} (E7)
 //   engagementGain {unit, level, max} (E7)
-//   powerStart {power, team, lane, position, radius, warnTime, fallTime, pen} · powerImpact {power, team, lane, position, radius, hits} (E8)
+//   powerStart {power, team, lane, position, …} · powerImpact {power, team, lane, position, radius, hits, target?, base?} · powerEnd {power} (E8/E9)
 // Reservados para a fase Game Feel (nomes fixos, ainda não emitidos):
 //   unitKnockback {unit, force} · powerStart/powerImpact {power, lane, team, position}
 //   baseCritical {team} · tretaFinal · chaosSpike {level} · capitalFull {team}

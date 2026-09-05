@@ -1,10 +1,15 @@
 // ============================================================
-// PowerEffects — apresentação dos PODERES (só escuta o EventBus + lê game.powers.pens
-// para desenhar marcador/sombra). Nunca aplica dano nem muda estado de jogo.
+// PowerEffects — apresentação dos PODERES (só escuta o EventBus + lê game.powers.pens/motos
+// para desenhar marcador/sombra/rastro). Nunca aplica dano nem muda estado de jogo.
 // CANETADA (≤ 1,5 s):
 //   powerStart  → meme + apito + MARCADOR pulsante no chão (legível ≥ warnTime)
 //   queda       → SOMBRA escura crescendo sob a caneta
 //   powerImpact → onda + tinta + dourado + papéis + texto + shake + hit-stop (≤ 80 ms) + som
+// MOTOCIATA: powerStart → meme + ronco crescendo + shake; motos deixam fumaça baixa e marca de
+//   pneu (partículas rasteiras, não cobrem barras de HP); cada atropelo → faíscas + shake pequeno,
+//   SEM hit-stop; chegada na base → fumaça + som.
+// RECESSO: powerStart → meme "RECESSO!" pelo tempo do poder + som; powerEnd (endSignal s antes
+//   do fim) → sinal sonoro + "VOLTOU!"; as poses vêm de Gestures.js via playRecesso.
 // ============================================================
 import * as THREE from 'three';
 import { Config } from '../config/Config.js';
@@ -21,6 +26,8 @@ export class PowerEffects {
     this.shadowPool = [];
     bus.on('powerStart', (e) => this.onStart(e));
     bus.on('powerImpact', (e) => this.onImpact(e));
+    bus.on('powerEnd', (e) => this.onEnd(e));
+    this._smokeT = 0;
   }
 
   _marker() {
@@ -50,8 +57,19 @@ export class PowerEffects {
     return s;
   }
 
-  onStart({ power, position, radius, pen }) {
+  onStart({ power, position, radius, pen, duration }) {
     const g = this.game;
+    if (power === 'motociata') {
+      g.effects.text.meme('MOTOCIATA!', { color: '#ffffff', force: true });
+      g.audio.play('motoRev');
+      g.camera.addShake(Config.powers.motociata.shake);
+      return;
+    }
+    if (power === 'recesso') {
+      g.effects.text.meme('RECESSO!', { color: '#ffe9a8', force: true, duration });
+      g.audio.play('special');
+      return;
+    }
     if (power !== 'canetada') return;
     g.effects.text.meme('CANETADA!', { color: '#c9b6ff', force: true });
     g.audio.play('canetada');
@@ -65,8 +83,27 @@ export class PowerEffects {
     this.markers.set(pen, { marker, shadow, radius });
   }
 
-  onImpact({ power, position, radius }) {
+  onEnd({ power }) {
     const g = this.game;
+    if (power !== 'recesso') return;
+    g.audio.play('recessoEnd');
+    g.effects.text.meme('VOLTOU!', { color: '#ffe9a8', force: true, duration: 0.7 });
+  }
+
+  onImpact({ power, position, radius, base, target }) {
+    const g = this.game;
+    if (power === 'motociata') {
+      const P = Config.powers.motociata;
+      if (base) {
+        g.effects.particles.burst(position.clone().setY(0.6), 12, { color: 0x999999, speed: 4, size: 0.3, gravity: 3, smoke: true, life: 1 });
+        g.audio.play('baseHit');
+      } else {
+        const hp = target && target.hitPoint ? target.hitPoint : position.clone().setY(0.8);
+        g.effects.particles.burst(hp, 8, { color: 0xffe08a, speed: 5, size: 0.14, gravity: 9, life: 0.4 });
+        g.camera.addShake(P.hitShake);
+      }
+      return;
+    }
     if (power !== 'canetada') return;
     const P = Config.powers.canetada;
     const pos = position.clone().setY(0.5);
@@ -81,8 +118,18 @@ export class PowerEffects {
     g.audio.play('stamp');
   }
 
-  // por frame (visualDt): marcador pulsa durante o aviso; sombra cresce durante a queda; libera no fim
+  // por frame (visualDt): marcador pulsa durante o aviso; sombra cresce durante a queda; libera no fim;
+  // motos deixam fumaça baixa + marca de pneu (rasteiras: não sobem até as barras de HP)
   update(dt) {
+    this._smokeT -= dt;
+    if (this._smokeT <= 0) {
+      this._smokeT = 0.05;
+      for (const m of this.game.powers.motos) {
+        if (!m.alive) continue;
+        this.game.effects.particles.burst(m.mesh.position.clone().setY(0.25), 1, { color: 0x9a9a9a, speed: 0.6, size: 0.4, gravity: -0.6, life: 0.6, smoke: true, up: 0.4 });
+        this.game.effects.particles.burst(m.mesh.position.clone().setY(0.03), 1, { color: 0x333333, speed: 0.1, size: 0.3, gravity: 0, life: 1.2, paper: true, up: 0, spread: 0.5 });
+      }
+    }
     for (const [pen, m] of this.markers) {
       if (!pen.active) { this._release(pen, m); continue; }
       if (pen.phase === 'warn') {
