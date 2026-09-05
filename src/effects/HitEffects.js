@@ -25,9 +25,9 @@ export class HitEffects {
     const fx = g.effects;
     const hp = unit.hitPoint;
     const heavy = strength === 'heavy' || strength === 'special';
-    fx.text.damage(amount, hp, heavy);
+    if (strength !== 'light' || Config.clutter.damageNumbersLight >= 1) fx.text.damage(amount, hp, heavy);   // legibilidade: golpe fraco sem número
     if (strength === 'light') {
-      fx.particles.burst(hp, 3, { color: 0xffffff, speed: 2.5, size: 0.12, gravity: 9, life: 0.4 });
+      if (Config.clutter.lightHitParticles > 0) fx.particles.burst(hp, Config.clutter.lightHitParticles, { color: 0xffffff, speed: 2.5, size: 0.12, gravity: 9, life: 0.4 });
       unit.visual.flash(0xff6644, C.hitFlashDuration * 0.5);
       unit.visual.playHit(0.6);
       g.audio.play('hit');

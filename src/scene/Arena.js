@@ -39,7 +39,7 @@ export class Arena {
     const totalW = L.laneSpacing * 2 + L.laneWidth + 6;
 
     // chão gramado gigante
-    const ground = mesh(G.plane(200, 200), lambert(0x7fb95a), 0, -0.02, 0);
+    const ground = mesh(G.plane(200, 200), lambert(0x8ab66b), 0, -0.02, 0);   // grama menos saturada: os bonecos saltam
     ground.rotation.x = -Math.PI / 2;
     ground.castShadow = false;
     r.add(ground);
@@ -65,7 +65,7 @@ export class Arena {
       r.add(lane);
       // faixas centrais tracejadas amarelas
       for (let z = -laneLen / 2 + 1; z < laneLen / 2; z += 3) {
-        const dash = mesh(G.box(0.25, 0.02, 1.4), basicMat(0xf0c419), x, 0.06, z);
+        const dash = mesh(G.box(0.25, 0.02, 1.4), basicMat(0xe3d79a), x, 0.06, z);   // faixa pálida: guia a lane sem competir
         dash.castShadow = false; dash.receiveShadow = false;
         r.add(dash);
       }
@@ -87,17 +87,18 @@ export class Arena {
     if (gardenW > 0.5) {
       for (let i = 0; i < 2; i++) {
         const x = (i === 0 ? -1 : 1) * L.laneSpacing / 2;
-        const g = mesh(G.box(gardenW - 0.3, 0.18, laneLen - 2), lambert(0x6fae4c), x, 0.09, 0);
+        const g = mesh(G.box(gardenW - 0.3, 0.18, laneLen - 2), lambert(0x79a85a), x, 0.09, 0);
         g.castShadow = false;
         r.add(g);
         // gradinhas baixas
-        for (let z = -laneLen / 2 + 2; z < laneLen / 2 - 1; z += 2.4) {
-          const fence = mesh(G.box(gardenW - 0.5, 0.35, 0.08), lambert(0x3d3d3d), x, 0.35, z);
+        const CL = Config.clutter;
+        if (CL.fenceEvery > 0) for (let z = -laneLen / 2 + 2; z < laneLen / 2 - 1; z += CL.fenceEvery) {
+          const fence = mesh(G.box(gardenW - 0.5, 0.3, 0.08), lambert(0x556b46), x, 0.3, z);   // verde-escuro, não preto
           fence.castShadow = false;
           r.add(fence);
         }
         // arvorezinhas
-        for (let z = -laneLen / 2 + 3; z < laneLen / 2 - 2; z += 6) {
+        for (let z = -laneLen / 2 + 3; z < laneLen / 2 - 2; z += CL.gardenTreeEvery) {
           this.addTree(x, z, 0.55 + Math.random() * 0.2);
         }
       }
@@ -128,8 +129,9 @@ export class Arena {
     this.addCar(back - 3.5, 5, 0x3f6fd6, Math.PI / 2);
     this.addCar(back - 2.5, 14, 0xf0d53a, Math.PI / 2 + 0.2);
     this.addCar(4, -half - 8, 0x4fae62, 0);
-    for (let i = 0; i < 6; i++) this.addCone(back + rand(-1.5, 0.5), rand(-16, 16));
-    for (let i = 0; i < 4; i++) this.addCone(rand(-8, 8), (i < 2 ? -1 : 1) * (half + rand(4, 9)));
+    const CL = Config.clutter;
+    for (let i = 0; i < Math.ceil(CL.cones * 0.6); i++) this.addCone(back + rand(-1.5, 0.5), rand(-16, 16));
+    for (let i = 0; i < Math.floor(CL.cones * 0.4); i++) this.addCone(rand(-8, 8), (i < 1 ? -1 : 1) * (half + rand(4, 9)));
     this.addPalanque(back2 - 1, -14, true);
     this.addPalanque(back2 - 1, 13, true);
     // placas: em x negativo elas ficam VOLTADAS PARA A CÂMERA (addSign gira +Z → +X) e legíveis
@@ -138,19 +140,19 @@ export class Arena {
     this.addSign(back - 0.5, 4, 'ÁREA DE\nTRETA');
     this.addSign(back - 0.5, 16, 'NÃO VALE\nPRINT');
     // papéis: rasteiros (y = 0.03), podem ficar dos dois lados sem atrapalhar a leitura
-    for (let i = 0; i < 40; i++) this.addPaper(rand(-totalW / 2 - 6, totalW / 2 + 5), rand(-half, half));
+    for (let i = 0; i < CL.groundPapers; i++) this.addPaper(rand(-totalW / 2 - 6, totalW / 2 + 5), rand(-half, half));
     // bandeiras genéricas: fundo e além das bases
     this.addFlag(back2, -half + 1, 0xffffff, 0x33aa55);
     this.addFlag(back2, half - 1, 0xffffff, 0x2bb3c0);
     this.addFlag(back2 - 5, -half - 7, 0xffffff, 0xf0c419);
     this.addFlag(back2 - 5, half + 7, 0xffffff, 0xe8772e);
     // gramado externo com árvores espalhadas — nunca entre a câmera e o campo
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < CL.backgroundTrees; i++) {
       const x = rand(-60, back2 - 3); const z = rand(-60, 60);
       this.addTree(x, z, rand(0.9, 1.6));
     }
     // algumas árvores além das bases (horizonte nos extremos esquerdo/direito da tela)
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < CL.farTrees; i++) {
       const z = (i % 2 ? 1 : -1) * rand(half + 12, 55);
       this.addTree(rand(back2, 10), z, rand(0.9, 1.6));
     }

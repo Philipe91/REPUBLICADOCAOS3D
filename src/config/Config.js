@@ -28,10 +28,10 @@ export const Config = {
 
   // ---------- MEMES CONTEXTUAIS (effects/MemeDirector.js) ----------
   memes: {
-    cooldown: 4.0,           // s entre memes do diretor (÷ visual.memeFrequency)
-    chance: 0.7,             // probabilidade base × peso da regra × memeFrequency
+    cooldown: 6.0,           // s entre memes do diretor (÷ visual.memeFrequency) — legibilidade: menos texto gritando
+    chance: 0.55,            // probabilidade base × peso da regra × memeFrequency
     duration: 1.3,
-    idleEvery: 16,           // s sem nada acontecer → meme aleatório de ambiente
+    idleEvery: 26,           // s sem nada acontecer → meme aleatório de ambiente
     maxWait: 2.0,            // s que um candidato espera (cooldown / meme forçado na tela) antes de ser descartado
   },
 
@@ -110,6 +110,24 @@ export const Config = {
     matchEndSlowRecovery: 0.15,
   },
 
+  // ---------- LEGIBILIDADE / POLUIÇÃO VISUAL ----------
+  // Princípio: só o que importa (bonecos, golpes, poderes) pode ser saturado e animado;
+  // cenário, chão e efeitos secundários ficam em segundo plano.
+  clutter: {
+    backgroundTrees: 10,        // árvores no fundo (era 26)  — aplicado ao montar a arena
+    farTrees: 4,                // árvores além das bases (era 10)
+    groundPapers: 10,           // papéis soltos no chão (era 40)
+    cones: 4,                   // cones (era 10)
+    gardenTreeEvery: 9,         // espaçamento das arvorezinhas dos canteiros (era 6)
+    fenceEvery: 4.8,            // espaçamento das gradinhas (era 2.4); 0 = sem gradinhas
+    fogNear: 42,                // névoa começa mais perto: fundo esmaece, campo salta (era 60)
+    fogFar: 115,
+    nameOnSpawnMinCost: 4,      // nome flutuante só para cartas de custo ≥ 4 (heróis); hordas nunca
+    damageNumbersLight: 0,      // 1 = mostra número de dano em golpes fracos (light)
+    lightHitParticles: 2,       // partículas em golpe fraco (era 3)
+    spawnParticlesCheap: 0.5,   // multiplicador das partículas de entrada para cartas baratas
+  },
+
   // ---------- UI / UX DAS CARTAS (ui/CardUI.js, ui/HUD.js) ----------
   ui: {
     toastDuration: 0.9,             // s que o aviso "CAPITAL INSUFICIENTE" fica na tela
@@ -138,7 +156,7 @@ export const Config = {
     baseVisualScale: 1.0,   // escala visual das SEDES DO PODER
     headScale: 1.4,
     spawnEffectScale: 1.0,  // intensidade das entradas (anel, partículas, shake) — effects/SpawnEffects.js
-    teamRingOpacity: 0.6,   // anel de time sob cada unidade (HealthBarManager, instanciado)
+    teamRingOpacity: 0.38,  // anel de time sob cada unidade (HealthBarManager, instanciado) — discreto
     showUnitNameOnSpawn: true,
     shadowEnabled: true,
     particleAmount: 1.0,

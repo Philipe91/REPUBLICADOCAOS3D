@@ -33,6 +33,9 @@ export class SpawnEffects {
     const S = Config.visual.spawnEffectScale;
     const color = TEAM_COLORS[team];
     const swarm = units.length > 1;
+    const cost = (Config.units[type] && Config.units[type].cost) || 0;
+    const cheap = cost < Config.clutter.nameOnSpawnMinCost;
+    const PS = S * (cheap ? Config.clutter.spawnParticlesCheap : 1);   // legibilidade: entrada barata = menos partículas
     _c.set(0, 0, 0);
     for (const u of units) _c.add(u.pos);
     _c.divideScalar(units.length);
@@ -43,10 +46,11 @@ export class SpawnEffects {
     fx.particles.ring(center, { color, radius: (swarm ? 1.8 : 1.2) * S, duration: 0.45 });
     for (const u of units) u.visual.flash(0xffffff, 0.12);
     if (!swarm) {
-      fx.particles.burst(center.clone().setY(0.3), Math.round(8 * S), { color, speed: 3, size: 0.2, gravity: 6 });
-      fx.particles.burst(center.clone().setY(0.4), Math.round(5 * S), { color: 0xe6e6e6, speed: 1.2, size: 0.35, gravity: -0.8, life: 0.6, smoke: true, up: 0.6 });
+      fx.particles.burst(center.clone().setY(0.3), Math.round(8 * PS), { color, speed: 3, size: 0.2, gravity: 6 });
+      fx.particles.burst(center.clone().setY(0.4), Math.round(5 * PS), { color: 0xe6e6e6, speed: 1.2, size: 0.35, gravity: -0.8, life: 0.6, smoke: true, up: 0.6 });
     }
-    if (Config.visual.showUnitNameOnSpawn) {
+    // nome flutuante só para heróis (custo ≥ clutter.nameOnSpawnMinCost); hordas nunca
+    if (Config.visual.showUnitNameOnSpawn && !swarm && !cheap) {
       const top = center.clone().setY(lead.visual.height + 0.9);
       fx.text.show(NAMES[type] || type.toUpperCase(), top, { color: CSS[team], size: 1.05, life: 0.8, rise: 1.1, font: 'bold 40px Arial' });
     }

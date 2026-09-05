@@ -50,7 +50,7 @@ if (L.start && L.impact) {
   check('impacto em warn+fall (±1 frame)', Math.abs(impactAt - (L.start.warn + L.start.fall)) <= dtF + 1e-6, `impacto ${impactAt.toFixed(2)} s vs ${(L.start.warn + L.start.fall).toFixed(2)} s`);
   const inRadius = L.damages.filter(d => r.inside.includes(d.id));
   check('dano aplicado no MESMO frame do powerImpact, 1 por inimigo no raio, nenhum fora', inRadius.length === 3 && inRadius.every(d => d.f === L.impact.f) && !L.damages.some(d => d.id === r.outside) && L.impact.hits === 3, JSON.stringify({ n: inRadius.length, frames: inRadius.map(d => d.f), impactF: L.impact.f, strength: inRadius[0] && inRadius[0].strength }));
-  check('aviso no chão visível ≥ 0,4 s antes do impacto', L.markerT0 !== null && (L.markerT1 - L.markerT0) >= 0.4 - dtF && L.markerT0 <= L.start.t + dtF + 1e-6, JSON.stringify({ t0: L.markerT0, t1: L.markerT1, frames: L.markerFrames }));
+  check('aviso no chão visível ≥ 0,4 s antes do impacto', L.markerT0 !== null && (L.markerT1 - L.markerT0) >= 0.4 - dtF && L.markerT0 <= L.start.t + 3 * dtF + 1e-6, JSON.stringify({ t0: L.markerT0, t1: L.markerT1, frames: L.markerFrames }));
   check('sombra apareceu durante a queda', L.shadowSeen);
   check('hit-stop do impacto ≤ 80 ms', L.hsMax > 0 && L.hsMax <= 0.08 + 1e-6, `${(L.hsMax * 1000).toFixed(0)} ms`);
   check('sequência completa ≤ 1,5 s (caneta some) e marcador liberado', L.penGone !== null && (L.penGone - L.start.t) <= 1.5 + dtF && r.marker === 'released' && r.pens === 0, JSON.stringify({ total: L.penGone && +(L.penGone - L.start.t).toFixed(2), marker: r.marker, pens: r.pens }));

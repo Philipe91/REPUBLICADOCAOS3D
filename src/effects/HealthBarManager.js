@@ -31,7 +31,7 @@ export class HealthBarManager {
     this.bg.renderOrder = 10;
     this.fill.renderOrder = 11;
     // anel de time (plano no chão, já deitado na geometria: instância só posiciona/escala)
-    const ringGeo = new THREE.RingGeometry(0.66, 0.92, 28);
+    const ringGeo = new THREE.RingGeometry(0.74, 0.92, 28);   // anel fino e discreto
     ringGeo.rotateX(-Math.PI / 2);
     this.ring = new THREE.InstancedMesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: Config.visual.teamRingOpacity, depthWrite: false }), MAX);
     this.ring.instanceMatrix.setUsage(THREE.DynamicDrawUsage);

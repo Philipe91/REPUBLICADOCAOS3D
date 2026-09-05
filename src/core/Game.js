@@ -200,6 +200,7 @@ export class Game {
       this.scene.traverse(o => { if (o.material) o.material.needsUpdate = true; });
     }
     this.arena.setDebugMarkers(Config.visual.debugLaneMarkers || Config.debug.showLaneCenters);
+    if (this.scene.fog) { this.scene.fog.near = Config.clutter.fogNear; this.scene.fog.far = Config.clutter.fogFar; }
 
     // gameDt: partida, unidades, bot, Capital, poderes, projéteis. visualDt: bases, partículas de mundo.
     // raw: UI, texto de tela, câmera, timer da tela final, perf. Ver TimeController.

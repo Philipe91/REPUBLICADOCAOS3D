@@ -131,6 +131,10 @@ O projeto 2D em Godot (`D:\projeto-novo`, repo Philipe91/Republicadocaos) tem sp
 
 Visual: `visual/procedural/Props.js` (novo) recebeu as armas/acessórios do Rig + laço, chapéu, faixa, apito, violão, pneu e livro. Perfis e gestos em `Profiles.js`; animações dos especiais novos em `ProceduralAnimations.special`. Decks padrão NÃO mudaram (as cartas novas entram pelo MONTAR DECK). Teste: `test/elenco.mjs`; capturas em `test/shots/elenco/`. Balanceamento das cartas novas: medido com `test/e12.mjs` (aceita decks por argv[6]/[7]): valores iniciais perdiam 6/6 nos dois sentidos; após duas rodadas de reforço (Mascote 1000/55, Agro Boy 500/36, Coach 560/30, Pastor 450 + 3 fiéis de 80/10, Pneus 250/44, Maconheiro 340/18, Músico 360/26) o HP final ficou ~3800×4200 e ~3600×3800 — perto da paridade, ainda um pouco abaixo do deck antigo.
 
+## LEGIBILIDADE (05/09, PC de casa — Philipe: "muito poluído visualmente")
+
+Princípio aplicado (da skill de UI/UX): só o que é jogo (bonecos, golpes, poderes) pode ser saturado e animado; cenário, chão e efeitos secundários ficam em segundo plano. Tudo em `Config.clutter` (pasta LEGIBILIDADE no lil-gui): árvores de fundo 26 → 10 (+ 4 além das bases), papéis no chão 40 → 10, cones 10 → 4, gradinhas pretas viraram verde-escuro e mais espaçadas, arvorezinhas dos canteiros mais raras, faixas amarelas pálidas, grama menos saturada, névoa começando em 42 (era 60) para o fundo esmaecer, nome flutuante só para cartas de custo ≥ 4 e nunca em horda, golpe fraco sem número de dano e com 2 faíscas, partículas de entrada pela metade em carta barata, anel de time mais fino e a 0.38, memes com cooldown 6 s e ambiente a cada 26 s. Contagens da arena valem ao montar; névoa/nomes/números valem em tempo real. Antes/depois em `test/shots/legib/`.
+
 ## BLENDER (05/09, PC de casa — piloto do fluxo Blender → GLB → jogo)
 
 - Blender 5.2.1 LTS portátil em `%LOCALAPPDATA%\Programs\Blender\blender.exe` (o MSI do winget pede UAC; o zip não). Headless: `blender.exe -b -P tools/blender/<personagem>.py -- public/models/<tipo>.glb`.
