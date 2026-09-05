@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { Config, TEAM_COLORS } from '../config/Config.js';
 import { G, mat, basicMat } from '../core/Assets.js';
+import { bus } from '../core/EventBus.js';
 
 export class Powers {
   constructor(game) {
@@ -18,6 +19,9 @@ export class Powers {
   }
 
   // ---------------- CANETADA ----------------
+  // LÓGICA: aviso (warnTime) → queda (fallTime) → IMPACTO (dano em área + base) → fica 0,25 s → sobe e some (0,5 s).
+  // Apresentação (marcador, sombra, onda, papéis, texto, shake, hit-stop, som) fica em
+  // effects/PowerEffects.js via eventos powerStart / powerImpact.
   canetada(team, lane) {
     const P = Config.powers.canetada;
     const g = this.game;
@@ -33,15 +37,13 @@ export class Powers {
     if (z === null) z = (team === 'player' ? -1 : 1) * g.arena.halfLen * 0.35;
     const x = g.arena.laneX(lane);
     const pen = this._acquirePen();
-    pen.mesh.position.set(x, 16, z);
+    pen.mesh.position.set(x, 16 + 1.1, z);
     pen.mesh.rotation.set(0, 0, 0.15);
-    pen.mesh.visible = true;
-    Object.assign(pen, { t: 0, team, lane, x, z, hit: false, dmg: P.damage, radius: P.radius });
+    pen.mesh.visible = false;                       // só aparece quando começa a cair
+    Object.assign(pen, { t: 0, team, lane, x, z, phase: 'warn', active: true, impactT: 0, dmg: P.damage, radius: P.radius, warnTime: P.warnTime, fallTime: P.fallTime });
     this.pens.push(pen);
-    g.effects.text.meme('CANETADA!', { color: '#c9b6ff', force: true });
-    g.audio.play('canetada');
-    // marca de alvo no chão
-    g.effects.particles.ring(new THREE.Vector3(x, 0, z), { color: 0x9b7bff, radius: P.radius, duration: 0.55, y: 0.12 });
+    bus.emit('powerStart', { power: 'canetada', team, lane, position: new THREE.Vector3(x, 0, z), radius: P.radius, warnTime: P.warnTime, fallTime: P.fallTime, pen });
+    return pen;
   }
 
   _acquirePen() {
@@ -153,23 +155,22 @@ export class Powers {
     }
     if (this.recessoTimer > 0) this.recessoTimer -= dt;
 
-    // canetas caindo
+    // canetas: aviso → queda → impacto → fincada → sobe e some (≤ 1,5 s no total)
     for (let i = this.pens.length - 1; i >= 0; i--) {
       const p = this.pens[i];
       p.t += dt;
-      if (!p.hit) {
-        const fall = Math.min(1, p.t / 0.55);
+      if (p.phase === 'warn') {
+        if (p.t >= p.warnTime) { p.phase = 'fall'; p.mesh.visible = true; }
+      }
+      if (p.phase === 'fall') {
+        const fall = Math.min(1, (p.t - p.warnTime) / Math.max(0.01, p.fallTime));
         p.mesh.position.y = 16 - 16 * fall * fall + 1.1;
         p.mesh.rotation.z = 0.15 - fall * 0.15;
-        if (fall >= 1) {
-          p.hit = true;
-          this._penImpact(p);
-        }
-      } else {
-        // fica fincada 0.6s, depois sobe e some
-        const t = p.t - 0.55;
-        if (t > 0.6) p.mesh.position.y += dt * 25;
-        if (t > 1.3) { p.mesh.visible = false; this.penPool.push(p); this.pens.splice(i, 1); }
+        if (fall >= 1) { p.phase = 'stuck'; p.impactT = p.t; this._penImpact(p); }
+      } else if (p.phase === 'stuck') {
+        const t = p.t - p.impactT;
+        if (t > 0.25) p.mesh.position.y += dt * 25;
+        if (t > 0.5) { p.active = false; p.mesh.visible = false; this.penPool.push(p); this.pens.splice(i, 1); }
       }
     }
 
@@ -207,32 +208,28 @@ export class Powers {
     }
   }
 
+  // IMPACTO (frame exato): dano em área na lane + base se caiu perto; emite powerImpact para a apresentação
   _penImpact(p) {
     const g = this.game;
     const pos = new THREE.Vector3(p.x, 0.5, p.z);
-    g.camera.addShake(0.9);
-    g.hitStop(Config.combat.hitStopDuration * 1.5);
-    g.effects.particles.burst(pos, 30, { color: 0x1b1b3a, speed: 7, size: 0.25, gravity: 9 });
-    g.effects.particles.burst(pos, 20, { color: 0xffd700, speed: 6, size: 0.18, gravity: 9 });
-    g.effects.particles.burst(pos, 16, { color: 0xfdfdf5, speed: 5, size: 0.3, gravity: 1.5, paper: true, life: 2.5 });
-    g.effects.particles.ring(pos, { color: 0xc9b6ff, radius: p.radius * 1.2, duration: 0.5 });
-    g.audio.play('bigHit');
     const enemies = g.units.enemiesInLane(p.team, p.lane);
     const dmg = p.dmg * Config.combat.globalDamageMultiplier;
+    let hits = 0;
     for (const e of enemies) {
       if (!e.alive) continue;
       const dx = e.pos.x - p.x, dz = e.pos.z - p.z;
       if (dx * dx + dz * dz <= p.radius * p.radius) {
-        e.takeDamage(dmg, { pos, dir: p.team === 'player' ? -1 : 1, knockback: Config.powers.canetada.knockback }, { big: true });
+        e.takeDamage(dmg, { pos, dir: p.team === 'player' ? -1 : 1, knockback: Config.powers.canetada.knockback }, { strength: 'special' });
+        hits++;
       }
     }
-    // atinge a base se caiu perto dela
     const base = g.enemyBase(p.team);
     if (!base.destroyed && Math.abs(base.front - p.z) <= p.radius) base.takeDamage(dmg * 0.5, null);
+    bus.emit('powerImpact', { power: 'canetada', team: p.team, lane: p.lane, position: new THREE.Vector3(p.x, 0, p.z), radius: p.radius, hits });
   }
 
   clear() {
-    for (const p of this.pens) { p.mesh.visible = false; this.penPool.push(p); }
+    for (const p of this.pens) { p.active = false; p.mesh.visible = false; this.penPool.push(p); }
     this.pens.length = 0;
     for (const m of this.motos) { m.mesh.visible = false; this.motoPool.push(m); }
     this.motos.length = 0;

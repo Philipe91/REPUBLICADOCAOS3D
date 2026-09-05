@@ -16,6 +16,7 @@ import { HealthBarManager } from '../effects/HealthBarManager.js';
 import { SpawnEffects } from '../effects/SpawnEffects.js';
 import { HitEffects } from '../effects/HitEffects.js';
 import { SpecialEffects } from '../effects/SpecialEffects.js';
+import { PowerEffects } from '../effects/PowerEffects.js';
 import { AudioManager } from '../audio/AudioManager.js';
 import { UnitManager } from '../units/UnitManager.js';
 import { Powers } from '../cards/Powers.js';
@@ -67,6 +68,7 @@ export class Game {
     this.spawnFx = new SpawnEffects(this);   // apresentação: só escuta unitSpawned
     this.hitFx = new HitEffects(this);       // apresentação: só escuta unitDamaged/unitDied
     this.specialFx = new SpecialEffects(this); // apresentação: só escuta specialStart/End, engagementGain
+    this.powerFx = new PowerEffects(this);     // apresentação: powerStart/powerImpact (marcador, sombra, onda…)
     this.time = new TimeController();     // única fonte de escala de tempo (hit-stop, slow-mo, gameSpeed)
     this.perf = new PerfStats(this);
     this.stress = new StressTest(this);
@@ -139,6 +141,7 @@ export class Game {
   clearMatch() {
     this.units.clear();
     this.powers.clear();
+    this.powerFx.clear();
     this.effects.particles.clear();
     this.effects.text.clear();
     this.effects.projectiles.clear();
@@ -223,6 +226,7 @@ export class Game {
       }
       this.units.update(dt, visualDt);
       this.powers.update(dt);
+      this.powerFx.update(visualDt);
       this.effects.projectiles.update(dt);
       this.cardUI.update();
       this.hud.update();

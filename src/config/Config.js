@@ -142,7 +142,7 @@ export const Config = {
 
   // ---------- PODERES (cartas instantâneas) ----------
   powers: {
-    canetada: { cost: 4, damage: 220, radius: 3.5, knockback: 1.5 },
+    canetada: { cost: 4, damage: 220, radius: 3.5, knockback: 1.5, warnTime: 0.45, fallTime: 0.45, hitStop: 0.07, shake: 0.9 },   // aviso ≥ 0,4 s; total ≤ 1,5 s
     motociata: { cost: 4, damage: 70, knockback: 2.5, motoCount: 3 },
     recesso:   { cost: 3, duration: 2.2 },
     pesquisa:  { cost: 2, duration: 8, bonus: 0.3 },
