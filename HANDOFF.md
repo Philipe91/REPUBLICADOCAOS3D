@@ -1,6 +1,6 @@
 # HANDOFF — continuar o projeto em outra máquina / nova conversa
 
-Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E12 — fase Game Feel completa). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
+Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E12 + ELENCO 2). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
 
 ---
 
@@ -113,7 +113,25 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 
 **Recomendação de performance (não feita, só medida):** 1445 draw calls com 42–50 unidades vêm dos ~30 meshes por boneco procedural. Se o alvo for < 1000 calls com 50 unidades, o próximo passo é InstancedMesh para os militantes (horda) — decisão do Philipe.
 
-**Próximo passo concreto:** Philipe joga uma partida manual (Player vs Bot), ajusta pelo lil-gui o que sentir (Motociata, Capital, câmera) e cola o COPIAR CONFIG; depois decidir InstancedMesh e o início dos modelos Blender (a interface CharacterVisual/GLBCharacterVisual já aceita playAttack onImpact e playDeath por força). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
+## ELENCO 2 (05/09, PC de casa — a pedido do Philipe: "veja se dá pra aproveitar o jogo da pasta arquivo novo")
+
+O projeto 2D em Godot (`D:\projeto-novo`, repo Philipe91/Republicadocaos) tem sprites em tiras 2D (a maioria com 128 px de altura; os principais com 2172×724). **Não viram modelo nem textura 3D**; o que foi aproveitado é o **design e as mecânicas** (docs `INIMIGOS-DA-DIREITA.md`, `GDD.md`, `ART_BIBLE.md`). Alerta: a ficha do Biroliro e o chefão são caricaturas muito próximas de pessoas reais — a regra dos dois projetos é personagem fictício; no 3D tudo ficou genérico/caricatural.
+
+7 unidades novas, SÓ por dados + hooks existentes (nada em Bot.js/UnitManager.js; Unit.js só passou a ler `small/swarm/projectile/projectileGround` do Config em vez do nome do tipo):
+| Carta | Custo | Papel | Mecânica (Config.units.*) |
+|---|---|---|---|
+| AGRO BOY 🤠 | 4 | CONTROL | LAÇO: puxa o inimigo mais distante no alcance (`lacoRange`), stuna (`lacoStun`) e chuta |
+| COACH 💪 | 4 | BUFF | MOTIVAÇÃO: +25% dano/veloc. aos aliados (`motivacao*`); sofre dano extra enquanto grita (`motivacaoVulnerable`) |
+| PASTOR 📖 | 5 | SPAWNER | Invoca FIÉIS (`fieisPorInvocacao`, teto `fieisMax`); PREGAÇÃO +20% veloc. aos fiéis perto; morrer remove a pregação |
+| FIEL (não é carta) | 0 | horda | `small/swarm` como o militante, placa "AMÉM/GLÓRIA/SAI!" |
+| PNEUS 🛞 | 3 | RANGED | Pneu que rola no chão (`projectile: 'pneu'`, `projectileGround`) |
+| MACONHEIRO 🌿 | 3 | CONTROL | NUVEM: inimigos perto a 50% de veloc. e 75% de ritmo (`nuvem*`) |
+| MÚSICO 🎸 | 3 | SUPPORT | ACORDE: 12 de dano + empurrão em área (`acorde*`) |
+| MASCOTE 🎭 | 5 | TANK | TOMBAMENTO: investida de 7 u que atropela (60, 1× por inimigo) e fica tonto na base (`tombamento*`) |
+
+Visual: `visual/procedural/Props.js` (novo) recebeu as armas/acessórios do Rig + laço, chapéu, faixa, apito, violão, pneu e livro. Perfis e gestos em `Profiles.js`; animações dos especiais novos em `ProceduralAnimations.special`. Decks padrão NÃO mudaram (as cartas novas entram pelo MONTAR DECK). Teste: `test/elenco.mjs`; capturas em `test/shots/elenco/`. Balanceamento das cartas novas: só valores iniciais razoáveis — medir com `test/e12.mjs` (overrides) antes de mexer.
+
+**Próximo passo concreto:** Philipe joga uma partida manual (Player vs Bot), ajusta pelo lil-gui o que sentir (Motociata, Capital, câmera, elenco novo) e cola o COPIAR CONFIG; depois decidir InstancedMesh e o início dos modelos Blender (a interface CharacterVisual/GLBCharacterVisual já aceita playAttack onImpact e playDeath por força). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 

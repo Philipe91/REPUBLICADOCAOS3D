@@ -41,10 +41,10 @@ export class Unit {
     this.hp = this.maxHp;
     this.radius = 0.45 * (st.scale ?? 1);
     this.visualScale = st.scale ?? 1;
-    this.isSwarm = type === 'militante';
-    this.isSmall = type === 'militante';
+    this.isSwarm = !!st.swarm;                 // horda: barra de HP some quando cheia
+    this.isSmall = !!st.small;                 // pequeno: mais knockback, voa mais ao morrer
     this.isRanged = st.attackRange >= 3;
-    this.projectileKind = type === 'tiozap' ? 'zap' : type === 'influencer' ? 'like' : 'generic';
+    this.projectileKind = st.projectile ?? 'generic';
     this.alive = true;
     this.state = STATE.SPAWNING;
     this.stateTime = 0;
@@ -345,7 +345,7 @@ export class Unit {
       const from = this.hitPoint;
       from.z += this.dir * 0.3;
       this.game.effects.projectiles.spawn({
-        from, target, kind: this.projectileKind, speed: this.stats.projectileSpeed ?? 12,
+        from, target, kind: this.projectileKind, speed: this.stats.projectileSpeed ?? 12, ground: !!this.stats.projectileGround,
         onHit: (t) => this._applyDamage(t, dmg, strength),
       });
       if (this.projectileKind === 'zap') this.game.audio.play('zap');

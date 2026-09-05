@@ -102,7 +102,7 @@ export class DebugPanel {
 
     // UNIDADES (INDIVIDUAL)
     const u = gui.addFolder('UNIDADES'); u.close();
-    const names = { militante: 'MILITANTE', tiozap: 'TIO DO ZAP', assessor: 'ASSESSOR', influencer: 'INFLUENCER', barbudo: 'BARBUDO', capitao: 'CAPITÃO', careca: 'CARECA DA CANETA', dino: 'DINO', moto: 'MOTO (motociata)' };
+    const names = { militante: 'MILITANTE', tiozap: 'TIO DO ZAP', assessor: 'ASSESSOR', influencer: 'INFLUENCER', barbudo: 'BARBUDO', capitao: 'CAPITÃO', careca: 'CARECA DA CANETA', dino: 'DINO', moto: 'MOTO (motociata)', agroboy: 'AGRO BOY', coach: 'COACH', pastor: 'PASTOR', fiel: 'FIEL (do Pastor)', pneus: 'MANIFESTANTE DOS PNEUS', maconheiro: 'MACONHEIRO', musico: 'MÚSICO', mascote: 'MASCOTE' };
     for (const type in Config.units) {
       const f = u.addFolder(names[type] || type); f.close();
       const st = Config.units[type];

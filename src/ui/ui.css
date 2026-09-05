@@ -93,7 +93,7 @@ body.treta #timer { color: #ff5a5a; }
 /* ---------- TELAS ---------- */
 .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 30%, rgba(30,34,70,0.75), rgba(10,10,25,0.92)); z-index: 20; }
 .screen-box { text-align: center; color: #fff; padding: 36px 48px; background: rgba(20,22,38,0.85); border-radius: 24px; border: 3px solid rgba(255,255,255,0.12); box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-width: 92vw; }
-.screen-box.wide { width: 900px; }
+.screen-box.wide { width: 980px; max-height: 94vh; overflow-y: auto; }   /* 19+ cartas: cabe em telas baixas com rolagem */
 .logo { font-family: 'Bangers', cursive; font-size: 92px; line-height: 0.9; margin: 0; color: var(--gold); text-shadow: 5px 5px 0 #000, -2px -2px 0 #000; letter-spacing: 4px; transform: rotate(-2deg); }
 .logo-sub { font-family: 'Bangers', cursive; font-size: 34px; margin: 12px 0 0; color: #fff; letter-spacing: 4px; text-shadow: 3px 3px 0 #000; }
 .tagline { opacity: 0.75; font-size: 14px; margin: 14px 0 22px; }
@@ -109,8 +109,10 @@ body.treta #timer { color: #ff5a5a; }
 #end-stats .stat b { display: block; font-family: 'Bangers', cursive; font-size: 30px; color: var(--gold); letter-spacing: 1px; }
 #end-stats .stat span { font-size: 11px; font-weight: 900; letter-spacing: 1.5px; opacity: 0.7; }
 
-#deck-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 10px 0 20px; }
-#deck-grid .card { width: 100%; height: 140px; }
+#deck-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 10px 0 16px; }
+#deck-grid .card { width: 100%; height: 124px; }
+#deck-grid .card .icon { font-size: 40px; margin-top: 16px; }
+#deck-grid .card .name { font-size: 14px; margin-top: 4px; }
 #deck-grid .card.in-deck { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,210,63,0.5), 0 6px 0 #3a2f1c; }
 #deck-grid .card:not(.in-deck) { filter: grayscale(0.7) brightness(0.7); }
 #deck-grid .card .desc { font-size: 9px; color: #333; padding: 0 6px; text-align: center; line-height: 1.15; }

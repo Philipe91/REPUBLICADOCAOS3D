@@ -8,7 +8,7 @@ import { G, mat, basicMat } from '../core/Assets.js';
 
 const _dir = new THREE.Vector3();
 
-const KIND_COLOR = { zap: 0x5ce27a, like: 0xff4d8d, generic: 0xffee66 };
+const KIND_COLOR = { zap: 0x5ce27a, like: 0xff4d8d, generic: 0xffee66, pneu: 0x333333 };
 
 export class ProjectileManager {
   constructor(scene, particles = null) {
@@ -38,16 +38,22 @@ export class ProjectileManager {
     // genérico
     const gen = new THREE.Mesh(G.sphere(0.18, 8), basicMat(0xffee66));
     g.add(gen);
+    // pneu (rola no chão, gira no eixo de avanço)
+    const pneu = new THREE.Group();
+    const tire = new THREE.Mesh(G.torus(0.32, 0.13, 8, 18), mat(0x1e1e1e)); tire.rotation.y = Math.PI / 2; pneu.add(tire);
+    const hub = new THREE.Mesh(G.cylinder(0.17, 0.17, 0.1, 10), mat(0x8a8a8a)); hub.rotation.z = Math.PI / 2; pneu.add(hub);
+    g.add(pneu);
     g.visible = false;
     this.scene.add(g);
-    return { group: g, parts: { zap, like, generic: gen }, kind: 'zap', target: null, speed: 10, onHit: null, t: 0, spin: 0 };
+    return { group: g, parts: { zap, like, generic: gen, pneu }, kind: 'zap', target: null, speed: 10, onHit: null, t: 0, spin: 0, ground: false };
   }
 
-  spawn({ from, target, kind = 'zap', speed = 12, onHit, arc = 1.2 }) {
+  spawn({ from, target, kind = 'zap', speed = 12, onHit, arc = 1.2, ground = false }) {
     let p = this.free.pop();
     if (!p) p = this._create();
-    p.kind = kind; p.target = target; p.speed = speed; p.onHit = onHit; p.t = 0; p.spin = 0;
+    p.kind = kind; p.target = target; p.speed = speed; p.onHit = onHit; p.t = 0; p.spin = 0; p.ground = ground;
     p.group.position.copy(from);
+    if (ground) p.group.position.y = 0.45;   // rasteiro: nasce e viaja no chão
     p.start = from.clone();
     p.arc = arc;
     for (const k in p.parts) p.parts[k].visible = k === kind;
@@ -63,6 +69,7 @@ export class ProjectileManager {
       const tgt = p.target;
       if (!tgt || !tgt.alive) { this._release(i); continue; }
       const tp = tgt.hitPoint;
+      if (p.ground) tp.y = 0.45;              // mira o pé do alvo (pneu rola no chão)
       _dir.subVectors(tp, p.group.position);
       const dist = _dir.length();
       const step = p.speed * dt;
@@ -77,12 +84,20 @@ export class ProjectileManager {
       }
       _dir.normalize();
       p.group.position.addScaledVector(_dir, step);
-      // pequena curva para cima no meio da trajetória
       p.t += dt;
-      p.group.position.y += Math.sin(Math.min(1, p.t * 2) * Math.PI) * p.arc * dt;
-      p.spin += dt * 10;
-      p.group.rotation.y = Math.atan2(_dir.x, _dir.z);
-      p.group.rotation.z = Math.sin(p.spin) * 0.3;
+      if (p.ground) {                          // rola: sem arco, gira no eixo de avanço
+        p.group.position.y = 0.45;
+        p.spin += dt * p.speed / 0.32;
+        p.group.rotation.y = Math.atan2(_dir.x, _dir.z);
+        p.group.rotation.x = p.spin;
+      } else {
+        // pequena curva para cima no meio da trajetória
+        p.group.position.y += Math.sin(Math.min(1, p.t * 2) * Math.PI) * p.arc * dt;
+        p.spin += dt * 10;
+        p.group.rotation.y = Math.atan2(_dir.x, _dir.z);
+        p.group.rotation.z = Math.sin(p.spin) * 0.3;
+        p.group.rotation.x = 0;
+      }
     }
   }
 

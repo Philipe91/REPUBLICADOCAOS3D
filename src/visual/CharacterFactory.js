@@ -81,6 +81,23 @@ export function buildSpec(type, team) {
         hair: 'short', hairColor: 0x111111, beard: true, suit: true, tie: 0x3d6db5,
         weapon: null, mouth: 'smile', teamColor,
       };
+    // ---- ELENCO 2 ----
+    case 'agroboy':
+      return { scale, headScale: 1.1, bodyType: 'normal', skin: 0xd9a066, shirt: 0xc94a2a, pants: 0x2f4a8a, shoes: 0x5a3a1e, hair: 'short', hairColor: 0x3a2412, beard: true, weapon: 'laco', accessory: 'hat', hatColor: 0x8b5a2b, mouth: 'flat', eyeStyle: 'angry', teamColor };
+    case 'coach':
+      return { scale, headScale: 1.05, bodyType: 'big', skin: 0xe8b98a, shirt: 0x2e8b57, pants: 0x1c1c1c, shoes: 0xffffff, hair: 'bald', hairColor: 0x222222, sunglasses: true, weapon: 'megaphone', accessory: 'headband', bandColor: 0xf5b400, mouth: 'shout', teamColor };
+    case 'pastor':
+      return { scale, headScale: 1.15, bodyType: 'belly', skin: 0xf1c27d, shirt: 0x2b2b3a, pants: 0x2b2b3a, shoes: 0x111111, hair: 'side', hairColor: 0x4a4a4a, suit: true, tie: 0x6b2a8f, glasses: true, weapon: 'book', bookColor: 0x3b2a6b, mouth: 'shout', teamColor };
+    case 'fiel':
+      return { scale, headScale: 1.0, bodyType: 'small', skin: pick([0xf1c27d, 0xc68642, 0x8d5524, 0xffdbac]), shirt: 0xf4f4f4, pants: pick([0x2f3542, 0x555555]), hair: pick(['short', 'side']), hairColor: pick([0x2b1d14, 0x111111, 0x8b5a2b]), weapon: 'sign', signText: pick(['AMÉM', 'GLÓRIA', 'SAI!']), mouth: 'shout', eyeStyle: 'sleepy', teamColor, teamBand: false };
+    case 'pneus':
+      return { scale, headScale: 1.05, bodyType: 'normal', skin: 0xc68642, shirt: 0x3a6b35, pants: 0x2f3542, shoes: 0x111111, hair: 'cap', hairColor: 0x111111, weapon: 'tire', mouth: 'shout', eyeStyle: 'angry', teamColor };
+    case 'maconheiro':
+      return { scale, headScale: 1.1, bodyType: 'small', skin: 0xf1c27d, shirt: 0x5b8f3a, pants: 0x8b7355, shoes: 0x333333, hair: 'side', hairColor: 0x2b1d14, beard: true, weapon: null, mouth: 'smile', eyeStyle: 'sleepy', teamColor };
+    case 'musico':
+      return { scale, headScale: 1.05, bodyType: 'normal', skin: 0xd9a066, shirt: 0x8b1e3f, pants: 0x1c1c1c, shoes: 0x111111, hair: 'side', hairColor: 0x111111, sunglasses: true, weapon: 'guitar', mouth: 'smile', teamColor };
+    case 'mascote':
+      return { scale, headScale: 1.5, bodyType: 'big', skin: 0xffd23f, shirt: 0xffd23f, pants: 0x2e8b57, shoes: 0xffffff, hair: 'cap', hairColor: 0xffd23f, weapon: null, accessory: 'whistle', mouth: 'smile', eyeStyle: 'normal', teamColor };
     default:
       return { scale, teamColor, shirt: teamColor };
   }

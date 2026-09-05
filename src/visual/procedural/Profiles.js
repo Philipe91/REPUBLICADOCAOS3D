@@ -24,6 +24,15 @@ export const PROFILES = {
   careca:     { tempo: 0.72, bob: 0.5, armSwing: 0.6, rigidity: 0.8, lean: 1.3, gesture: 'pen',     gestureEvery: 3.6, gestureDuration: 1.6, jitter: 0,   deathBias: null },
   dino:       { tempo: 0.7,  bob: 1.5, armSwing: 0.9, rigidity: 0.6, lean: 1.2, gesture: 'stretch', gestureEvery: 3.8, gestureDuration: 1.4, jitter: 0,   deathBias: null },
   moto:       { tempo: 1.0,  bob: 0,   armSwing: 0,   rigidity: 1.0, lean: 1.0, gesture: null,      gestureEvery: 99,  gestureDuration: 0,   jitter: 0,   deathBias: null },
+  // ---- ELENCO 2 ----
+  agroboy:    { tempo: 0.95, bob: 1.1, armSwing: 1.2, rigidity: 0.4, lean: 1.1, gesture: 'pen',     gestureEvery: 3.4, gestureDuration: 1.3, jitter: 0,   deathBias: null },
+  coach:      { tempo: 1.2,  bob: 1.4, armSwing: 1.4, rigidity: 0.3, lean: 1.2, gesture: 'stretch', gestureEvery: 2.8, gestureDuration: 1.2, jitter: 0,   deathBias: null },
+  pastor:     { tempo: 0.8,  bob: 0.7, armSwing: 0.6, rigidity: 0.6, lean: 0.9, gesture: 'mic',     gestureEvery: 3.5, gestureDuration: 1.6, jitter: 0,   deathBias: null },
+  fiel:       { tempo: 1.15, bob: 1.2, armSwing: 1.1, rigidity: 0.3, lean: 1.0, gesture: 'shout',   gestureEvery: 2.5, gestureDuration: 0.9, jitter: 0.3, deathBias: null },
+  pneus:      { tempo: 0.9,  bob: 0.9, armSwing: 0.7, rigidity: 0.5, lean: 1.0, gesture: 'papers',  gestureEvery: 3.6, gestureDuration: 1.2, jitter: 0,   deathBias: null },
+  maconheiro: { tempo: 0.6,  bob: 0.6, armSwing: 0.5, rigidity: 0.1, lean: 0.8, gesture: 'phone',   gestureEvery: 3.0, gestureDuration: 1.8, jitter: 0,   deathBias: null },
+  musico:     { tempo: 1.05, bob: 1.1, armSwing: 0.9, rigidity: 0.2, lean: 1.0, gesture: 'pose',    gestureEvery: 3.0, gestureDuration: 1.4, jitter: 0,   deathBias: null },
+  mascote:    { tempo: 0.75, bob: 1.6, armSwing: 1.0, rigidity: 0.5, lean: 1.3, gesture: 'stretch', gestureEvery: 3.5, gestureDuration: 1.3, jitter: 0,   deathBias: null },
 };
 
 // Perfil de UMA instância: default ← tipo, com jitter aleatório (horda visivelmente dessincronizada).

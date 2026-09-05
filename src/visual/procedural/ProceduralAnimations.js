@@ -107,6 +107,47 @@ export function special(rig, t, kind = 'default', duration = 1) {
       P.head.rotation.z = Math.sin(t * 20) * 0.15;
       break;
     }
+    case 'laco': {       // gira o laço sobre a cabeça e joga
+      const e = Math.min(1, p * 1.6);
+      P.armR.rotation.x = -2.9 * e; P.armR.rotation.z = Math.sin(t * 22) * 0.5 * e;
+      P.body.rotation.z = Math.sin(t * 22) * 0.06; P.head.rotation.x = -0.3 * e;
+      if (P.weapon) P.weapon.rotation.y = t * 25;
+      break;
+    }
+    case 'motivacao': {  // flexiona, grita, pula no lugar
+      P.armL.rotation.x = -1.4; P.armR.rotation.x = -1.4; P.armL.rotation.z = -1.1; P.armR.rotation.z = 1.1;
+      P.body.rotation.x = -0.15; P.head.rotation.x = -0.35;
+      rig.model.position.y = Math.abs(Math.sin(t * 14)) * 0.18;
+      if (P.mouth) P.mouth.scale.y = 1.6;
+      break;
+    }
+    case 'invocar': {    // levanta o livro com as duas mãos
+      P.armR.rotation.x = -3.0; P.armL.rotation.x = -3.0; P.armL.rotation.z = -0.3; P.armR.rotation.z = 0.3;
+      P.head.rotation.x = -0.45; P.body.rotation.x = -0.1;
+      rig.model.position.y = Math.sin(p * Math.PI) * 0.12;
+      break;
+    }
+    case 'nuvem': {      // senta relaxado e solta a nuvem
+      rig.model.position.y = -rig.legH * 0.5 * Math.min(1, p * 3);
+      P.legL.rotation.x = -1.2; P.legR.rotation.x = -1.2;
+      P.armR.rotation.x = -1.9; P.armR.rotation.z = -0.3; P.head.rotation.x = -0.35;
+      P.body.rotation.x = -0.15;
+      break;
+    }
+    case 'acorde': {     // dedilha forte e joga a cabeça
+      P.armR.rotation.x = -0.9 + Math.sin(t * 30) * 0.6; P.armL.rotation.x = -1.4; P.armL.rotation.z = -0.9;
+      P.head.rotation.x = -0.5 * Math.sin(p * Math.PI); P.body.rotation.z = Math.sin(t * 15) * 0.1;
+      rig.model.position.y = Math.abs(Math.sin(t * 15)) * 0.1;
+      break;
+    }
+    case 'tombamento': { // corpo baixo e inclinado, braços para trás, pernas rápidas
+      P.body.rotation.x = 0.65 + rig.rest.body.rot.x; P.head.rotation.x = -0.5;
+      P.armL.rotation.x = 1.2; P.armR.rotation.x = 1.2;
+      const s = Math.sin(t * 28);
+      P.legL.rotation.x = s * 0.9; P.legR.rotation.x = -s * 0.9;
+      rig.model.position.y = Math.abs(Math.cos(t * 28)) * 0.06;
+      break;
+    }
     default: {
       P.armR.rotation.x = -2.5; P.armL.rotation.x = -2.5;
       rig.model.position.y = Math.abs(Math.sin(t * 10)) * 0.2;

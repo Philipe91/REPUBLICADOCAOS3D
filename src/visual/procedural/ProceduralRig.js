@@ -12,7 +12,8 @@
 //      │   └ acessórios no tronco (gravata, capa, ring light, cauda...)
 // ============================================================
 import * as THREE from 'three';
-import { G, mat, basicMat, textTexture } from '../../core/Assets.js';
+import { G, mat, basicMat } from '../../core/Assets.js';
+import { buildWeapon, buildAccessory } from './Props.js';
 
 const DEFAULT_SPEC = {
   scale: 1,
@@ -30,8 +31,8 @@ const DEFAULT_SPEC = {
   cape: null,            // cor da capa ou null
   tie: null,             // cor da gravata ou null
   suit: false,
-  weapon: null,          // 'phone' | 'mic' | 'pen' | 'sign' | 'flag' | 'papers'
-  accessory: null,       // 'briefcase' | 'ringlight' | 'cap' | 'megaphone'
+  weapon: null,          // ver Props.js: phone | mic | pen | sign | flag | papers | megaphone | laco | guitar | tire | book
+  accessory: null,       // ver Props.js: briefcase | ringlight | cap | hat | headband | whistle
   flagColor: 0xffffff,
   signText: 'JÁ ERA',
   teamColor: 0xffffff,
@@ -172,9 +173,9 @@ export class ProceduralRig {
     P.head = head;
     this.height = this.bodyTop + hs * 2;
 
-    // arma / acessório na mão direita
-    this._buildWeapon();
-    this._buildAccessory();
+    // arma / acessório (Props.js: funções puras de construção)
+    buildWeapon(this);
+    buildAccessory(this);
 
     // pose de descanso
     for (const k in P) {
@@ -297,85 +298,6 @@ export class ProceduralRig {
       stick.position.set(0, top - hs * 1.6, -hs * 1.6);
       head.add(stick);
       this.parts.ringlight = ring;
-    }
-  }
-
-  _buildWeapon() {
-    const s = this.spec;
-    const hand = this.parts.handR;
-    if (!s.weapon || !hand) return;
-    const w = new THREE.Group();
-    switch (s.weapon) {
-      case 'phone': {
-        const ph = new THREE.Mesh(G.box(0.22, 0.4, 0.05), this._mat(0x222222));
-        ph.position.set(0, 0.1, 0.12);
-        ph.rotation.x = -0.4;
-        w.add(ph);
-        const scr = new THREE.Mesh(G.box(0.18, 0.32, 0.02), basicMat(0x5ce27a));
-        scr.position.set(0, 0.1, 0.15); scr.rotation.x = -0.4;
-        w.add(scr);
-        break;
-      }
-      case 'mic': {
-        const st = new THREE.Mesh(G.cylinder(0.04, 0.05, 0.45, 6), this._mat(0x333333));
-        st.position.set(0, 0.2, 0.05); st.rotation.x = -0.4; w.add(st);
-        const ball = new THREE.Mesh(G.sphere(0.13, 8), this._mat(0x777777));
-        ball.position.set(0, 0.45, 0.15); w.add(ball);
-        break;
-      }
-      case 'pen': {
-        const g = new THREE.Group();
-        const body = new THREE.Mesh(G.cylinder(0.09, 0.09, 1.9, 8), this._mat(0x1b1b3a));
-        body.position.y = 0.6; g.add(body);
-        const clip = new THREE.Mesh(G.box(0.04, 0.5, 0.04), this._mat(0xffd700));
-        clip.position.set(0.1, 1.0, 0); g.add(clip);
-        const tip = new THREE.Mesh(G.cone(0.09, 0.3, 8), this._mat(0xffd700));
-        tip.position.y = -0.5; tip.rotation.x = Math.PI; g.add(tip);
-        const nib = new THREE.Mesh(G.cone(0.03, 0.12, 6), this._mat(0x222222));
-        nib.position.y = -0.7; nib.rotation.x = Math.PI; g.add(nib);
-        g.rotation.x = 0.9; g.position.set(0.1, 0.1, 0.2);
-        w.add(g);
-        break;
-      }
-      case 'sign': {
-        const stick = new THREE.Mesh(G.cylinder(0.03, 0.03, 0.9, 5), this._mat(0x9b7653));
-        stick.position.y = 0.4; w.add(stick);
-        const board = new THREE.Mesh(G.box(0.7, 0.45, 0.04), new THREE.MeshLambertMaterial({ map: textTexture(s.signText, { w: 256, h: 160, font: 'bold 34px Arial', bg: '#fff5c2' }) }));
-        board.position.y = 0.95; w.add(board);
-        break;
-      }
-      case 'flag': {
-        const stick = new THREE.Mesh(G.cylinder(0.03, 0.03, 1.2, 5), this._mat(0x9b7653));
-        stick.position.y = 0.5; w.add(stick);
-        const flag = new THREE.Mesh(G.box(0.7, 0.45, 0.03), this._mat(s.flagColor));
-        flag.position.set(0.35, 0.9, 0); w.add(flag);
-        this.parts.flag = flag;
-        break;
-      }
-      case 'papers': {
-        for (let i = 0; i < 3; i++) {
-          const p = new THREE.Mesh(G.box(0.3, 0.4, 0.01), this._mat(0xfdfdf5));
-          p.position.set(0, 0.15, 0.1 + i * 0.02); p.rotation.z = (i - 1) * 0.2; w.add(p);
-        }
-        break;
-      }
-      case 'megaphone': {
-        const c = new THREE.Mesh(G.cone(0.22, 0.45, 8), this._mat(0xd94a4a));
-        c.position.set(0, 0.2, 0.3); c.rotation.x = Math.PI / 2 + 0.3; w.add(c);
-        break;
-      }
-    }
-    hand.add(w);
-    this.parts.weapon = w;
-  }
-
-  _buildAccessory() {
-    const s = this.spec;
-    if (s.accessory === 'briefcase' && this.parts.handL) {
-      const bc = new THREE.Mesh(G.box(0.45, 0.35, 0.14), this._mat(0x6b3e1e));
-      bc.position.set(0, -0.25, 0);
-      this.parts.handL.add(bc);
-      this.parts.accessory = bc;
     }
   }
 

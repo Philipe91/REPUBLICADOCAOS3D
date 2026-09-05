@@ -14,6 +14,14 @@ export const CARDS = {
   capitao:    { id: 'capitao',    name: 'CAPITÃO',    type: 'troop', unit: 'capitao',   icon: '🫡', cls: 'DPS',     desc: 'CERCADINHO + MOTOCIATA.' },
   careca:     { id: 'careca',     name: 'CARECA DA CANETA', type: 'troop', unit: 'careca', icon: '🖊️', cls: 'TANK/CTRL', desc: 'CANETADA lenta e forte. SUSPENSO!' },
   dino:       { id: 'dino',       name: 'DINO',       type: 'troop', unit: 'dino',      icon: '🦖', cls: 'TANK',    desc: 'A 50% HP: MODO JURÁSSICO.' },
+  // ---- ELENCO 2 ----
+  agroboy:    { id: 'agroboy',    name: 'AGRO BOY',   type: 'troop', unit: 'agroboy',   icon: '🤠', cls: 'CONTROL', desc: 'LAÇO puxa o inimigo e chuta.' },
+  coach:      { id: 'coach',      name: 'COACH',      type: 'troop', unit: 'coach',     icon: '💪', cls: 'BUFF',    desc: 'MOTIVAÇÃO: buff aos aliados, mas fica vulnerável.' },
+  pastor:     { id: 'pastor',     name: 'PASTOR',     type: 'troop', unit: 'pastor',    icon: '📖', cls: 'SPAWNER', desc: 'Invoca FIÉIS e prega (+veloc.).' },
+  pneus:      { id: 'pneus',      name: 'PNEUS',      type: 'troop', unit: 'pneus',     icon: '🛞', cls: 'RANGED',  desc: 'Rola pneus pelo chão.' },
+  maconheiro: { id: 'maconheiro', name: 'MACONHEIRO', type: 'troop', unit: 'maconheiro',icon: '🌿', cls: 'CONTROL', desc: 'NUVEM: inimigos perto ficam lentos.' },
+  musico:     { id: 'musico',     name: 'MÚSICO',     type: 'troop', unit: 'musico',    icon: '🎸', cls: 'SUPPORT', desc: 'ACORDE empurra quem está perto.' },
+  mascote:    { id: 'mascote',    name: 'MASCOTE',    type: 'troop', unit: 'mascote',   icon: '🎭', cls: 'TANK',    desc: 'TOMBAMENTO: investida que atropela.' },
 
   canetada:   { id: 'canetada',   name: 'CANETADA',   type: 'power', power: 'canetada', icon: '✒️', cls: 'PODER', target: 'lane',   desc: 'Caneta gigante cai na lane. Dano em área.' },
   motociata:  { id: 'motociata',  name: 'MOTOCIATA',  type: 'power', power: 'motociata',icon: '🏍️', cls: 'PODER', target: 'lane',   desc: 'Motos atravessam a lane. Dano + knockback.' },

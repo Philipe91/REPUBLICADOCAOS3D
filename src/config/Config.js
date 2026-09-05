@@ -160,15 +160,24 @@ export const Config = {
   // ---------- UNIDADES ----------
   // hp, damage, moveSpeed (u/s), attackSpeed (ataques/s), attackRange (u), cost, spawnCount
   units: {
-    militante: { hp: 60,   damage: 8,  moveSpeed: 3.2, attackSpeed: 1.6, attackRange: 1.1, cost: 1, spawnCount: 5, knockback: 0.2, scale: 0.75 },
-    tiozap:    { hp: 150,  damage: 18, moveSpeed: 1.8, attackSpeed: 0.9, attackRange: 7.0, cost: 2, spawnCount: 1, knockback: 0.3, scale: 1.0, projectileSpeed: 14 },
+    militante: { hp: 60,   damage: 8,  moveSpeed: 3.2, attackSpeed: 1.6, attackRange: 1.1, cost: 1, spawnCount: 5, knockback: 0.2, scale: 0.75, small: 1, swarm: 1 },
+    tiozap:    { hp: 150,  damage: 18, moveSpeed: 1.8, attackSpeed: 0.9, attackRange: 7.0, cost: 2, spawnCount: 1, knockback: 0.3, scale: 1.0, projectileSpeed: 14, projectile: 'zap' },
     assessor:  { hp: 170,  damage: 10, moveSpeed: 2.0, attackSpeed: 1.0, attackRange: 1.3, cost: 2, spawnCount: 1, knockback: 0.3, scale: 1.0, auraRadius: 4.5, auraBonus: 0.15 },
-    influencer:{ hp: 150,  damage: 20, moveSpeed: 1.9, attackSpeed: 1.0, attackRange: 6.0, cost: 3, spawnCount: 1, knockback: 0.3, scale: 1.0, projectileSpeed: 16, engajamentoBonus: 0.25, engajamentoMax: 4, engajamentoDuration: 6 },
+    influencer:{ hp: 150,  damage: 20, moveSpeed: 1.9, attackSpeed: 1.0, attackRange: 6.0, cost: 3, spawnCount: 1, knockback: 0.3, scale: 1.0, projectileSpeed: 16, projectile: 'like', engajamentoBonus: 0.25, engajamentoMax: 4, engajamentoDuration: 6 },
     barbudo:   { hp: 650,  damage: 32, moveSpeed: 1.5, attackSpeed: 0.8, attackRange: 1.6, cost: 5, spawnCount: 1, knockback: 0.6, scale: 1.15, auraRadius: 5, auraBonus: 0.2, specialCooldown: 10, discursoRadius: 6, discursoBonus: 0.3, discursoDuration: 5 },
     capitao:   { hp: 400,  damage: 22, moveSpeed: 2.2, attackSpeed: 2.2, attackRange: 1.5, cost: 5, spawnCount: 1, knockback: 0.4, scale: 1.05, cercadinhoRadius: 4, cercadinhoBonus: 0.08, cercadinhoMax: 5, specialCooldown: 12 },
     careca:    { hp: 850,  damage: 95, moveSpeed: 1.3, attackSpeed: 0.5, attackRange: 1.9, cost: 6, spawnCount: 1, knockback: 1.6, scale: 1.2, specialCooldown: 9, stunDuration: 2.5 },
     dino:      { hp: 1300, damage: 45, moveSpeed: 1.0, attackSpeed: 0.7, attackRange: 1.7, cost: 7, spawnCount: 1, knockback: 1.0, scale: 1.3, jurassicDamageMult: 1.8, jurassicKnockbackMult: 2.2, jurassicSpeedMult: 0.7, jurassicScale: 1.35, jurassicDuration: 1.1, jurassicInvulnerable: 1 },   // invulnerável durante a transformação (1 = sim)
     moto:      { hp: 1,    damage: 70, moveSpeed: 16,  attackSpeed: 0,   attackRange: 1.2, cost: 0, spawnCount: 3, knockback: 2.5, scale: 1.0 },
+    // ---- ELENCO 2 (adaptado do projeto 2D: mecânicas viraram passiva/especial por dados) ----
+    agroboy:   { hp: 380,  damage: 26, moveSpeed: 2.0, attackSpeed: 1.0, attackRange: 1.5, cost: 4, spawnCount: 1, knockback: 0.5, scale: 1.05, specialCooldown: 8, lacoRange: 6.5, lacoPull: 9, lacoStun: 0.45 },
+    coach:     { hp: 420,  damage: 24, moveSpeed: 2.1, attackSpeed: 1.8, attackRange: 1.3, cost: 4, spawnCount: 1, knockback: 0.4, scale: 1.1,  specialCooldown: 10, motivacaoRadius: 4.5, motivacaoBonus: 0.25, motivacaoDuration: 5, motivacaoVulnerable: 0.5 },
+    pastor:    { hp: 320,  damage: 12, moveSpeed: 1.6, attackSpeed: 0.8, attackRange: 1.4, cost: 5, spawnCount: 1, knockback: 0.3, scale: 1.05, specialCooldown: 9, fieisPorInvocacao: 2, fieisMax: 6, pregacaoRadius: 4, pregacaoBonus: 0.2 },
+    fiel:      { hp: 55,   damage: 7,  moveSpeed: 3.0, attackSpeed: 1.5, attackRange: 1.1, cost: 0, spawnCount: 1, knockback: 0.2, scale: 0.72, small: 1, swarm: 1 },
+    pneus:     { hp: 200,  damage: 30, moveSpeed: 1.7, attackSpeed: 0.7, attackRange: 7.5, cost: 3, spawnCount: 1, knockback: 1.0, scale: 1.0,  projectileSpeed: 9, projectile: 'pneu', projectileGround: 1 },
+    maconheiro:{ hp: 260,  damage: 10, moveSpeed: 1.6, attackSpeed: 0.8, attackRange: 1.4, cost: 3, spawnCount: 1, knockback: 0.2, scale: 1.0,  specialCooldown: 9, nuvemRadius: 4, nuvemSlow: 0.5, nuvemDuration: 4 },
+    musico:    { hp: 280,  damage: 18, moveSpeed: 1.9, attackSpeed: 1.1, attackRange: 1.5, cost: 3, spawnCount: 1, knockback: 0.3, scale: 1.0,  specialCooldown: 8, acordeRadius: 4, acordeDamage: 12, acordeKnockback: 1.8 },
+    mascote:   { hp: 700,  damage: 40, moveSpeed: 1.4, attackSpeed: 0.6, attackRange: 1.6, cost: 5, spawnCount: 1, knockback: 0.8, scale: 1.25, specialCooldown: 10, tombamentoRange: 7, tombamentoSpeed: 9, tombamentoDamage: 60, tombamentoKnockback: 2.0 },
   },
 
   // ---------- PODERES (cartas instantâneas) ----------
