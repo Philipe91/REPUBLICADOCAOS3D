@@ -6,6 +6,14 @@ import bpy
 import charlib as C
 import humanoid as H
 from specs import SPECS
+import importlib
+def build_any(kind):
+    """v2_<tipo>.py (orgânico, a partir de art_ref/) se existir; senão o humanoid v1"""
+    try:
+        mod = importlib.import_module('v2_' + kind)
+        return mod.build(SPECS.get(kind))
+    except ModuleNotFoundError:
+        return H.build(SPECS[kind])
 
 args = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 kind, outdir = args[0], args[1]
@@ -13,7 +21,7 @@ engine = (args[2] if len(args) > 2 else 'WORKBENCH').upper()
 os.makedirs(outdir, exist_ok=True)
 
 C.reset()
-P, dims = H.build(SPECS[kind])
+P, dims = build_any(kind)
 if SPECS[kind].get('jurassic'):
     for o in bpy.data.objects:
         if o.name.startswith('JUR_'): o.hide_render = True

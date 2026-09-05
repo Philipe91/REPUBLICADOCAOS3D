@@ -6,12 +6,20 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import charlib as C
 import humanoid as H
 from specs import SPECS
+import importlib
+def build_any(kind):
+    """v2_<tipo>.py (orgânico, a partir de art_ref/) se existir; senão o humanoid v1"""
+    try:
+        mod = importlib.import_module('v2_' + kind)
+        return mod.build(SPECS.get(kind))
+    except ModuleNotFoundError:
+        return H.build(SPECS[kind])
 
 args = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 if len(args) < 2: raise SystemExit('uso: -- <tipo> <saida.glb>')
 kind, out = args[0], args[1]
 spec = SPECS[kind]
 C.reset()
-P, dims = H.build(spec)
+P, dims = build_any(kind)
 H.clips(P, spec, dims)
 C.export(out)

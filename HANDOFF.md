@@ -146,6 +146,14 @@ Princípio aplicado (da skill de UI/UX): só o que é jogo (bonecos, golpes, pod
 
 **Próximo passo concreto:** Philipe joga uma partida manual (Player vs Bot), ajusta pelo lil-gui o que sentir e cola o COPIAR CONFIG; Sol gera as folhas de modelo (frente/lado/costas + pose característica) em `art_ref/`; seguir com Barbudo → Capitão → Careca → Dino em `tools/blender/`. Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
+## PERSONAGENS v2 (05/09, PC de casa — Philipe: "nao ta legal não, vou enviar as referências")
+
+- Referências do Sol em `art_ref/<personagem>/folha_sol_01.png` (Maconheiro, Barbudo, Militante): cartunesco, ~3,6 cabeças de altura, cabeça e mãos grandes, botas grandes, cabelo com volume. A folha do Militante traz sigla/bandeira de movimento real: **não reproduzir** (regra do projeto) — boné e camisa ficam na cor do time, placa sem texto. Barbudo é "barbudo grisalho genérico de camisa vermelha", não um retrato.
+- `tools/blender/orglib.py`: formas orgânicas por **metaball** (cada parte é um metaball próprio → malha suavizada + subsurf 1). Calibração: raio visível ≈ 0,556 × radius (rigidez 2, limiar 0,6); `ellipsoid(co, r, semi_eixos_absolutos)` converte. `cluster()` = nuvem de bolas (cabelo, barba, dreads); `torus()` para colar/aros; `parent_keep()` parenta ao Empty de animação mantendo a posição no mundo, então os clipes do `humanoid.clips` continuam valendo.
+- `tools/blender/v2_barbudo.py`, `v2_militante.py`, `v2_maconheiro.py`: `build()` devolve `(P, dims)`; `render.py` e `character.py` usam `build_any(kind)` (importa `v2_<kind>` se existir, senão o `humanoid` v1). Renders de aprovação: `blender.exe -b -P tools/blender/render.py -- <tipo> <pasta>` (3/4, frente, lado; Workbench). **GLBs v2 exportados**: barbudo 2,2 MB, militante 2,3 MB, maconheiro 1,8 MB (subsurf pesa; se precisar reduzir, `subdiv=0` nos blobs grandes).
+- `test/glb.mjs` passa com os v2 (8 clipes, tint TEAM por instância, flash, altura 2,05 vs 2,15 do procedural, anda/ataca/morre, Jurássico). `Config.visual.useGLB` segue **false** (os outros 13 tipos ainda são v1, misturar fica inconsistente); `?glb=1` mostra os v2 no jogo. Capturas em `test/shots/blender2/` (gitignored).
+- Próximo: Philipe aprova/reprova os três v2 pelas imagens; depois Sol gera folhas para Capitão, Careca, Dino, Influencer, Coach, Advogado, Assessor, Tiozão, Motoboy, Fiel, Zap, Blogueira, Bolha e os v2 seguem o mesmo molde. Quando todos forem v2, ligar `useGLB` por padrão.
+
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 
 - Apresentação (câmera, partículas, áudio, memes, tempo) só **escuta** eventos do `EventBus`; nunca altera estado de jogo.

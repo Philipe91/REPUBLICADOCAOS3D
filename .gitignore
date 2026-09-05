@@ -5,3 +5,4 @@ test/shots
 
 Claude outputs/
 standalone/
+__pycache__/
