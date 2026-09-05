@@ -84,6 +84,18 @@ export class AudioManager {
       case 'spawn':
         this._tone({ freq: 330, freq2: 660, type: 'triangle', dur: 0.12, gain: 0.2 });
         break;
+      case 'spawnHero':
+        this._tone({ freq: 220, freq2: 440, type: 'sawtooth', dur: 0.25, gain: 0.22 });
+        this._tone({ freq: 440, freq2: 880, type: 'square', dur: 0.22, gain: 0.12, delay: 0.1 });
+        break;
+      case 'stamp':
+        this._noise({ dur: 0.12, gain: 0.35, lp: 600 });
+        this._tone({ freq: 120, freq2: 60, type: 'square', dur: 0.15, gain: 0.3 });
+        break;
+      case 'stomp':
+        this._tone({ freq: 70, freq2: 30, type: 'sawtooth', dur: 0.4, gain: 0.45 });
+        this._noise({ dur: 0.3, gain: 0.35, lp: 400 });
+        break;
       case 'special':
         this._tone({ freq: 400, freq2: 900, type: 'sawtooth', dur: 0.3, gain: 0.22 });
         this._tone({ freq: 600, freq2: 1300, type: 'square', dur: 0.3, gain: 0.12, delay: 0.08 });

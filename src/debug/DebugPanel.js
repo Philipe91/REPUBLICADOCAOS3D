@@ -13,7 +13,7 @@ const RANGES = {
   lanes: { laneSpacing: [4, 10, 0.5], laneWidth: [2, 8, 0.5], spawnOffset: [0, 10, 0.5], fieldLength: [30, 70, 1] },
   combat: { globalDamageMultiplier: [0.1, 5, 0.05], globalHPMultiplier: [0.1, 5, 0.05], globalMoveSpeedMultiplier: [0.1, 4, 0.05], knockbackStrength: [0, 4, 0.1], bigHitThreshold: [10, 300, 5] },
   bot: { botDecisionInterval: [0.3, 5, 0.1], botAggressiveness: [0, 2, 0.05], botDefenseBias: [0, 2, 0.05], botRandomness: [0, 1, 0.05] },
-  visual: { characterScale: [0.4, 2.5, 0.05], baseVisualScale: [0.4, 3, 0.05], headScale: [0.8, 2.5, 0.05], particleAmount: [0, 3, 0.1], memeFrequency: [0, 3, 0.1] },
+  visual: { characterScale: [0.4, 2.5, 0.05], baseVisualScale: [0.4, 3, 0.05], headScale: [0.8, 2.5, 0.05], particleAmount: [0, 3, 0.1], memeFrequency: [0, 3, 0.1], spawnEffectScale: [0, 3, 0.1], teamRingOpacity: [0, 1, 0.05] },
 };
 
 const UNIT_RANGES = { hp: [1, 5000, 1], damage: [0, 500, 1], moveSpeed: [0.2, 20, 0.1], attackSpeed: [0.1, 5, 0.05], attackRange: [0.5, 15, 0.1], cost: [0, 10, 1], spawnCount: [1, 12, 1], knockback: [0, 5, 0.1], scale: [0.3, 3, 0.05], specialCooldown: [1, 60, 0.5] };
@@ -52,6 +52,7 @@ export class DebugPanel {
         f.add(Config.visual, 'shadowEnabled');
         f.add(Config.visual, 'floatingDamageEnabled');
         f.add(Config.visual, 'debugLaneMarkers');
+        f.add(Config.visual, 'showUnitNameOnSpawn');
       }
     }
     if (this.game.audio) gui.add(this.game.audio, 'volume', 0, 1, 0.05).name('volume').onChange(v => this.game.audio.setVolume(v));

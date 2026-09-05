@@ -13,6 +13,7 @@ import { ParticleManager } from '../effects/ParticleManager.js';
 import { FloatingTextManager } from '../effects/FloatingTextManager.js';
 import { ProjectileManager } from '../effects/ProjectileManager.js';
 import { HealthBarManager } from '../effects/HealthBarManager.js';
+import { SpawnEffects } from '../effects/SpawnEffects.js';
 import { AudioManager } from '../audio/AudioManager.js';
 import { UnitManager } from '../units/UnitManager.js';
 import { Powers } from '../cards/Powers.js';
@@ -60,6 +61,7 @@ export class Game {
     this.cardUI = new CardUI(this);
     this.screens = new Screens(this);
     this.debugDraw = new DebugDraw(this);
+    this.spawnFx = new SpawnEffects(this);   // apresentação: só escuta unitSpawned
     this.time = new TimeController();     // única fonte de escala de tempo (hit-stop, slow-mo, gameSpeed)
     this.perf = new PerfStats(this);
     this.stress = new StressTest(this);

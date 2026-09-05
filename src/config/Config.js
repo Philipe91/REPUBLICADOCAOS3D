@@ -94,8 +94,11 @@ export const Config = {
 
   visual: {
     characterScale: 1.0,
-    baseVisualScale: 1.0,   // escala visual das SEDES DO PODER (ainda NÃO aplicada — Entrega B)
+    baseVisualScale: 1.0,   // escala visual das SEDES DO PODER
     headScale: 1.4,
+    spawnEffectScale: 1.0,  // intensidade das entradas (anel, partículas, shake) — effects/SpawnEffects.js
+    teamRingOpacity: 0.6,   // anel de time sob cada unidade (HealthBarManager, instanciado)
+    showUnitNameOnSpawn: true,
     shadowEnabled: true,
     particleAmount: 1.0,
     floatingDamageEnabled: true,

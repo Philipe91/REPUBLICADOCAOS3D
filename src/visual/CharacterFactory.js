@@ -26,7 +26,7 @@ export function buildSpec(type, team) {
         hair: variant === 'cap' ? 'cap' : pick(['short', 'side', 'bald']),
         hairColor: pick([0x2b1d14, 0x111111, 0x8b5a2b, 0xd9b26f]),
         weapon: variant === 'flag' ? 'flag' : variant === 'sign' ? 'sign' : null,
-        flagColor: teamColor, teamColor,
+        flagColor: teamColor, teamColor, teamBand: false,   // horda já usa a cor do time na camiseta
         signText: pick(['JÁ ERA', 'FORA\nTODO MUNDO', 'CADÊ O\nPIX?', 'É HOJE', 'NÃO VALE\nPRINT', 'TÁ OK?']),
         mouth: 'shout', eyeStyle: 'angry',
       };

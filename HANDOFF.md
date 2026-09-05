@@ -1,6 +1,6 @@
 # HANDOFF — continuar o projeto em outra máquina / nova conversa
 
-Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1 + E2 + E3). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
+Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E4). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
 
 ---
 
@@ -61,7 +61,8 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 | E1 Fundação técnica (TimeController, PerfStats, Stress Test, chaves lil-gui) | ✅ concluída e commitada (04/09, PC de casa) |
 | E2 Extração procedural (visual/procedural/) | ✅ concluída e commitada (04/09, PC de casa) |
 | E3 UX Player vs Bot | ✅ concluída e commitada (04/09, PC de casa) |
-| E4..E12 | ⬜ não iniciadas |
+| E4 Identidade de time + spawn | ✅ concluída e commitada (05/09, PC de casa) |
+| E5..E12 | ⬜ não iniciadas |
 
 **Câmera lateral (04/09, PC de casa):** a lógica do jogo NÃO mudou (eixo Z, lanes em x). A câmera fica no lado +X olhando para −X: base do jogador à esquerda, bot à direita, lanes em profundidade. `Config.camera` agora é `cameraSide/cameraDistance/cameraHeight/cameraSideOffset/cameraTarget*/cameraFov` (posição derivada em `CameraController.cameraPosition`). Decoração alta da Arena foi para o lado −X/além das bases. `visual.baseVisualScale` criada (1.0). Harness `test/*.mjs` portado para Windows (`executablePath` do playwright, `shell:true`, `VIEWPORT=`). Medido na RTX 3060: ~200 fps, 570–780 draw calls com 10–19 unidades.
 
@@ -78,7 +79,9 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 
 **E3 (04/09, PC de casa) — UX Player vs Bot.** Só `ui/CardUI.js`, `ui/HUD.js`, `ui/ui.css`, `index.html` (+ `Config.ui` e pasta UI / UX no lil-gui). Sem Capital: carta treme em vermelho, aviso "CAPITAL INSUFICIENTE · FALTA N" acima da mão (`#card-toast`), Capital pisca; carta bloqueada mostra barra de "quanto falta" (`--ready`) que enche com o regen. Hover na lane: destaque forte + hint com o nome (FRONTAL/CENTRAL/TRASEIRA conforme `cameraSide`) + cursor pointer/crosshair. Capital pulsa a cada ponto ganho. Cancela por ESC, botão direito, clique fora e clique na carta selecionada (já existia). `test/player.mjs` (headless) cobre tudo e mede latência clique→spawn (~20 ms); capturas dos estados em `test/shots/player/`.
 
-**Próximo passo concreto:** E4 (identidade de time + spawn), só depois de o Philipe aprovar o relatório da E3. Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
+**E4 (05/09, PC de casa) — identidade de time + spawn.** `HealthBarManager` ganhou um 3º InstancedMesh: anel de time no chão sob toda unidade viva (`visual.teamRingOpacity`), e o fundo da barra é tingido com a cor do time. `ProceduralRig` ganhou a braçadeira (`spec.teamBand`, 1 mesh, cor do time; militante não usa porque já veste a cor). `effects/SpawnEffects.js` (novo) só escuta `unitSpawned`: anel + flash + fumaça + nome flutuante em toda entrada, e entradas especiais (Barbudo papéis/anel dourado, Capitão flash/estilhaços, Careca carimbo escuro + shake, Dino terra + shake), tudo × `visual.spawnEffectScale`, < 1 s, sem tocar `Unit.spawnTime`. `UnitManager.spawn` perdeu os efeitos inline (só emite o evento). Sons novos: spawnHero, stamp, stomp. Testes: `test/e4.mjs`. Stress 50: 1688 draw calls (E1: 1701).
+
+**Próximo passo concreto:** E5 (impacto sincronizado, hit reaction, mortes). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 

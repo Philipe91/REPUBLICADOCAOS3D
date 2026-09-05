@@ -35,6 +35,7 @@ const DEFAULT_SPEC = {
   flagColor: 0xffffff,
   signText: 'JÁ ERA',
   teamColor: 0xffffff,
+  teamBand: true,        // faixa na cor do time no braço esquerdo (identidade sem pintar o corpo)
   eyeStyle: 'normal',    // 'normal' | 'angry' | 'sleepy'
   mouth: 'smile',        // 'smile' | 'shout' | 'flat'
 };
@@ -144,6 +145,14 @@ export class ProceduralRig {
       body.add(g);
       P['arm' + side] = g;
       P['hand' + side] = hand;
+    }
+    // faixa de time (braçadeira) no braço esquerdo — 1 mesh, nunca o corpo inteiro
+    if (s.teamBand) {
+      const band = new THREE.Mesh(G.cylinder(0.115, 0.115, 0.14, 8), this._mat(s.teamColor));
+      band.position.y = -armLen * 0.36;
+      band.castShadow = false;
+      P.armL.add(band);
+      P.teamBand = band;
     }
 
     // cabeça (pivô no pescoço)

@@ -65,13 +65,15 @@ check('gameSpeed 2 → cronômetro ~2x', (g1 - g0) > 1.7 && (g1 - g0) < 2.3, `de
 await ev(() => game.time.setGameSpeed(1));
 
 // 6. stress test: 50 unidades reais, base intacta, CLEAR restaura
-const st0 = await ev(() => { game.stress.run(50); return { n: game.stress.count, total: game.units.count, php: game.bases.player.hp, bhp: game.bases.bot.hp }; });
+// bot não pode jogar cartas durante o stress (senão as unidades normais dele batem na base e o teste fica instável)
+const st0 = await ev(() => { Config.bot.botRandomness = 0; Config.game.capitalRegen = 100; game.botCtrl.capital = 0; game.player.capital = 0; game.stress.run(50); return { n: game.stress.count, total: game.units.count, php: game.bases.player.hp, bhp: game.bases.bot.hp }; });
 await page.waitForTimeout(6000);
 const st1 = await ev(() => ({ n: game.stress.count, php: game.bases.player.hp, bhp: game.bases.bot.hp, alive: game.units.units.filter(u => u.alive).length, cap: game.player.capital, played: game.player.cardsPlayed }));
 check('stress 50 gera 50 unidades reais', st0.n === 50 && st0.total >= 50, JSON.stringify(st0));
 check('stress não derruba bases (HP inalterado) e não conta como carta jogada', st1.php === st0.php && st1.bhp === st0.bhp && st1.played === 0, JSON.stringify(st1));
 const cl = await ev(() => { const removed = game.stress.clear(); return { removed, left: game.stress.count, total: game.units.count, broken: game.units.units.filter(u => u.target && !u.target.isBase && !u.target.alive).length }; });
 await page.waitForTimeout(500);
+await ev(() => { Config.game.capitalRegen = 1.5; });
 const cl2 = await ev(() => ({ total: game.units.count, stress: game.stress.count, broken: game.units.units.filter(u => u.target && !u.target.isBase && !u.target.alive).length, stale: game.units.units.filter(u => u.target && u.target.debugSpawn).length }));
 check('CLEAR remove só unidades de stress e não deixa alvo quebrado', cl.left === 0 && cl2.stress === 0 && cl.broken === 0 && cl2.broken === 0 && cl2.stale === 0, JSON.stringify({ cl, cl2 }));
 

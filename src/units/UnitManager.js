@@ -34,11 +34,8 @@ export class UnitManager {
       const u = new Unit(this.game, type, team, lane, x, z, visual);
       this.units.push(u);
       spawned.push(u);
-      const fx = this.game.effects;
-      fx.particles.burst(u.pos.clone().setY(0.3), 8, { color: team === 'player' ? 0x2bb3c0 : 0xe8772e, speed: 3, size: 0.2, gravity: 6 });
-      fx.particles.ring(u.pos, { color: team === 'player' ? 0x2bb3c0 : 0xe8772e, radius: 1.2, duration: 0.4 });
     }
-    this.game.audio.play('spawn');
+    // efeitos/som da entrada: effects/SpawnEffects.js escuta este evento
     bus.emit('unitSpawned', { type, team, lane, units: spawned });
     this._rebuild();
     return spawned;
