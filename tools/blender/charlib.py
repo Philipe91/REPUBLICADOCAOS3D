@@ -31,6 +31,7 @@ def material(name, rgb, roughness=0.75, emissive=None):
     m.use_nodes = True
     bsdf = m.node_tree.nodes.get('Principled BSDF')
     bsdf.inputs['Base Color'].default_value = (*rgb, 1.0)
+    m.diffuse_color = (*rgb, 1.0)   # cor de viewport (Workbench/render de revisão)
     bsdf.inputs['Roughness'].default_value = roughness
     if 'Specular IOR Level' in bsdf.inputs: bsdf.inputs['Specular IOR Level'].default_value = 0.2
     if emissive: bsdf.inputs['Emission Color'].default_value = (*emissive, 1.0); bsdf.inputs['Emission Strength'].default_value = 1.0
