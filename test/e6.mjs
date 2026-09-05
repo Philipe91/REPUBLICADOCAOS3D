@@ -30,7 +30,7 @@ await ev(() => { Config.bot.botAggressiveness = 0; Config.bot.botDefenseBias = 0
 
 const r = await ev(() => {
   game.units.clear();
-  const T = ['barbudo', 'capitao', 'careca', 'dino', 'tiozap', 'assessor', 'influencer'];
+  const T = ['tiozap', 'assessor', 'influencer', 'agroboy', 'coach', 'pastor', 'fiel'];   // procedurais com 7 gestos distintos (barbudo/capitão/careca/dino são GLB)
   const out = {};
   T.forEach((t, i) => { const [u] = game.units.spawn(t, 'player', i % 3, { count: 1, z: 12 - i }); const p = u.visual.animator.profile; out[t] = { gesture: p.gesture, tempo: p.tempo, rigidity: p.rigidity, ok: Object.values(p).every(v => v === null || typeof v === 'number' || typeof v === 'string') }; });
   const horde = game.units.spawn('fiel', 'bot', 1, { count: 5 });   // horda procedural com jitter (militante e GLB)

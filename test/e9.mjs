@@ -44,7 +44,7 @@ check('motociata: hit-stop nunca acima do padrão (sem acúmulo), fumaça abaixo
 // ---- 2. RECESSO: congela, poses, retoma o MESMO alvo ----
 const r = await ev(() => new Promise(res => {
   game.units.clear(); window.__ev.length = 0; Config.combat.knockbackStrength = 0;
-  const [a] = game.units.spawn('capitao', 'player', 1, { count: 1, z: 1.2 }); a.maxHp = a.hp = 1e9;
+  const [a] = game.units.spawn('assessor', 'player', 1, { count: 1, z: 1.2 }); a.maxHp = a.hp = 1e9;   // procedural (tem currentAnim) e sem especial
   const [d] = game.units.spawn('careca', 'bot', 1, { count: 1, z: -0.2 }); d.maxHp = d.hp = 1e9; d.stunned = 1e9;
   let phase = 0, targetBefore = null, animDuring = null, frozenSeen = false, hpDuring = null, hpAfterStart = null, resumed = null, endEv = null, zDuring = null, zAfterDuring = null;
   const id = setInterval(() => {

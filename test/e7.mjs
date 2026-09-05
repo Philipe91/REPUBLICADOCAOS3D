@@ -41,7 +41,7 @@ const j = await ev(() => new Promise(res => {
       clearInterval(id);
       d.takeDamage(100, null);                   // depois → vale
       const hpAfterEnd = d.hp;
-      setTimeout(() => res({ start: window.__ev.find(e => e.n === 'specialStart' && e.type === 'jurassico'), end, hpAtStart, hpAfterHit, hpAfterEnd, minFov, baseFov, fovBack: game.cameraObj.fov, jur: d.data.jurassic, scale: d.visualScale, tail: !!d.visual.rig.parts.tail, slowSeen: window.__ev.some(e => e.scale < 1) }), 1500);
+      setTimeout(() => res({ start: window.__ev.find(e => e.n === 'specialStart' && e.type === 'jurassico'), end, hpAtStart, hpAfterHit, hpAfterEnd, minFov, baseFov, fovBack: game.cameraObj.fov, jur: d.data.jurassic, scale: d.visualScale, tail: !!(d.visual.jurassic || (d.visual.rig && d.visual.rig.parts.tail)), slowSeen: window.__ev.some(e => e.scale < 1) }), 1500);
     }
   }, 30);
   setTimeout(() => { clearInterval(id); res({ timeout: true, ev: window.__ev }); }, 20000);

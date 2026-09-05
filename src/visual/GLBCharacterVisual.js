@@ -25,6 +25,10 @@ export class GLBCharacterVisual extends CharacterVisual {
       o.material = Array.isArray(o.material) ? cloned : cloned[0];
     });
     this.flashT = 0; this.flashColor = 0xffffff;
+    // peças do MODO JURÁSSICO (nós "JUR_…") ficam ocultas até transform('jurassic')
+    this.jurNodes = [];
+    this.object3d.traverse(o => { if (/^JUR_/i.test(o.name)) { o.visible = false; this.jurNodes.push(o); } });
+    this.jurassic = false;
     this.mixer = new THREE.AnimationMixer(this.object3d);
     this.clips = {};
     for (const c of gltf.animations) this.clips[c.name.toLowerCase()] = c;
@@ -74,7 +78,14 @@ export class GLBCharacterVisual extends CharacterVisual {
   setPosition(x, y, z) { this.object3d.position.set(x, y, z); }
   setScale(s) { this.extraScale = s; this._applyScale(); }
   flash(color = 0xffffff, time = 0.1) { this.flashT = time; this.flashColor = color; }
-  transform() {}   // ex.: MODO JURÁSSICO — futuro: trocar para dino_jurassico.glb ou clip 'transform'
+  // MODO JURÁSSICO: mostra os nós JUR_, pinta os materiais SKIN_ de verde e cresce (Config.units.dino.jurassicScale)
+  transform(spec) {
+    if (spec !== 'jurassic' || this.jurassic) return;
+    this.jurassic = true;
+    for (const o of this.jurNodes) o.visible = true;
+    for (const m of this.materials) if (/^SKIN_/i.test(m.name || '')) m.color.setHex(0x3f8f3a);
+    this.setScale(Config.units.dino.jurassicScale);
+  }
   update(dt) {
     this.mixer.update(dt);
     if (this.flashT > 0) {
