@@ -121,6 +121,7 @@ export class Base {
 
   takeDamage(amount, sourceUnit) {
     if (this.destroyed) return;
+    if (sourceUnit && sourceUnit.debugSpawn) return;   // unidades do STRESS TEST não derrubam a base
     this.hp = Math.max(0, this.hp - amount);
     this.flashTimer = 0.12;
     this.hitWobble = 1;

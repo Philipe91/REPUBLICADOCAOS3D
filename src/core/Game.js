@@ -22,6 +22,9 @@ import { HUD } from '../ui/HUD.js';
 import { CardUI } from '../ui/CardUI.js';
 import { Screens } from '../ui/Screens.js';
 import { DebugDraw } from '../debug/DebugDraw.js';
+import { TimeController } from './TimeController.js';
+import { PerfStats } from '../debug/PerfStats.js';
+import { StressTest } from '../debug/StressTest.js';
 
 const MEMES = ['TRETA!', 'EITA!', 'QUE FASE!', 'NÃO VALE PRINT!', 'TÁ OK?', 'CADÊ O PIX?', 'VAZOU!'];
 
@@ -57,19 +60,18 @@ export class Game {
     this.cardUI = new CardUI(this);
     this.screens = new Screens(this);
     this.debugDraw = new DebugDraw(this);
+    this.time = new TimeController();     // única fonte de escala de tempo (hit-stop, slow-mo, gameSpeed)
+    this.perf = new PerfStats(this);
+    this.stress = new StressTest(this);
 
     this.playing = false;
     this.ended = false;
     this.matchTime = 0;
-    this.timeScale = 1;
-    this.hitStopTimer = 0;
-    this.slowMo = 0;
     this.tretaFinal = false;
     this.overtime = 0;
     this.baseDamageRamp = 1;
     this.kills = { player: 0, bot: 0 };
-    this.fps = 0;
-    this._fpsAcc = 0; this._fpsN = 0;
+    this.fps = 0;                          // espelho de perf.fps (DebugDraw / testes)
     this.memeTimer = 8;
     this.endTimer = 0;
     this.result = null;
@@ -99,7 +101,7 @@ export class Game {
     this.cameraObj.updateProjectionMatrix();
   }
 
-  hitStop(t) { this.hitStopTimer = Math.max(this.hitStopTimer, t); }
+  hitStop(t) { this.time.hitStop(t); }   // atalho usado por Unit/Powers; a lógica vive no TimeController
 
   // ---------------- partida ----------------
   startMatch(playerDeck = null) {
@@ -133,7 +135,7 @@ export class Game {
     this.effects.particles.clear();
     this.effects.text.clear();
     this.effects.projectiles.clear();
-    this.hitStopTimer = 0; this.slowMo = 0;
+    this.time.reset();
     this.camera.shake = 0;
   }
 
@@ -156,7 +158,7 @@ export class Game {
     this.ended = true;
     this.result = victory ? 'victory' : 'defeat';
     this.endTimer = 2.6;
-    this.slowMo = 1.2;           // slow motion curto
+    this.time.slowMotion(Config.time.matchEndSlowScale, Config.time.matchEndSlowDuration, Config.time.matchEndSlowRecovery);
     this.camera.addShake(1.4);
     this.camera.zoomPunch = 6;
     this.units.celebrate(victory ? 'player' : 'bot');
@@ -180,10 +182,8 @@ export class Game {
   // ---------------- loop ----------------
   frame() {
     const now = performance.now();
-    let raw = Math.min(0.05, (now - this.lastFrame) / 1000);
+    const raw = Math.min(0.05, (now - this.lastFrame) / 1000);   // tempo REAL do frame
     this.lastFrame = now;
-    this._fpsAcc += raw; this._fpsN++;
-    if (this._fpsAcc >= 0.5) { this.fps = Math.round(this._fpsN / this._fpsAcc); this._fpsAcc = 0; this._fpsN = 0; }
 
     // luz/sombras (lil-gui em tempo real)
     if (this.renderer.shadowMap.enabled !== Config.visual.shadowEnabled) {
@@ -192,10 +192,9 @@ export class Game {
     }
     this.arena.setDebugMarkers(Config.visual.debugLaneMarkers || Config.debug.showLaneCenters);
 
-    let dt = raw * Config.game.gameSpeed;
-    let visualDt = dt;
-    if (this.slowMo > 0) { this.slowMo -= raw; dt *= 0.25; visualDt = dt; }
-    if (this.hitStopTimer > 0) { this.hitStopTimer -= raw; dt = 0; visualDt = raw * 0.05; }
+    // gameDt: partida, unidades, bot, Capital, poderes, projéteis. visualDt: bases, partículas de mundo.
+    // raw: UI, texto de tela, câmera, timer da tela final, perf. Ver TimeController.
+    const { gameDt: dt, visualDt } = this.time.update(raw);
 
     if (this.playing) {
       if (!this.ended) {
@@ -229,6 +228,8 @@ export class Game {
     this.camera.update(raw);
     this.debugDraw.update();
     this.renderer.render(this.scene, this.cameraObj);
+    this.perf.update(raw);
+    this.fps = Math.round(this.perf.fps);
   }
 
   updateMatchPhase(dt) {

@@ -53,8 +53,26 @@ export const Config = {
     globalHPMultiplier: 1.0,
     globalMoveSpeedMultiplier: 1.0,
     knockbackStrength: 1.0,
-    hitStopDuration: 0.06,  // pausa em golpes grandes (segundos)
+    hitStopDuration: 0.045, // pausa em golpes grandes (s). Fica em `combat` porque Unit.js/Powers.js leem daqui; o lil-gui mostra na seção TIME
     bigHitThreshold: 60,    // dano a partir do qual há hit-stop + shake
+  },
+
+  // ---------- TEMPO / GAME FEEL (core/TimeController.js) ----------
+  time: {
+    hitStopVisualRate: 0.05,        // fração do dt real que o visual roda durante o hit-stop
+    hitStopBudgetPerSecond: 0.3,    // máximo de hit-stop concedido por segundo (horda não vira travada)
+    slowMotionScale: 0.35,          // câmera lenta padrão: escala…
+    slowMotionDuration: 0.25,       // …segurada por (s)…
+    slowMotionRecovery: 0.15,       // …e retorno linear a 1 em (s)
+    matchEndSlowScale: 0.25,        // slow-motion da destruição da base
+    matchEndSlowDuration: 1.0,
+    matchEndSlowRecovery: 0.3,
+  },
+
+  // ---------- PERFORMANCE (debug/PerfStats.js) ----------
+  perf: {
+    showPerfOverlay: false,         // overlay leve (também ligado por ?debug=1)
+    perfSampleWindow: 3,            // janela (s) para FPS médio / mínimo recente
   },
 
   bot: {

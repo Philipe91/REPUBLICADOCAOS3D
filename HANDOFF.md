@@ -1,6 +1,6 @@
 # HANDOFF — continuar o projeto em outra máquina / nova conversa
 
-Atualizado em 04/09/2026 (fim da sessão no PC do trabalho). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
+Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
 
 ---
 
@@ -58,12 +58,18 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 | Plano E1..E12 | ✅ escrito, commitado |
 | Câmera lateral (pré-E1, pedido do Philipe em 04/09) | ✅ implementada e commitada — aguarda aprovação VISUAL do Philipe |
 | Aprovação do plano pelo Philipe | ⏳ pendente (ele viu o resumo, ainda não disse "aprovado") |
-| E1 Fundação técnica (TimeController, PerfStats, Stress Test, chaves lil-gui) | ⬜ não iniciada |
+| E1 Fundação técnica (TimeController, PerfStats, Stress Test, chaves lil-gui) | ✅ concluída e commitada (04/09, PC de casa) |
 | E2..E12 | ⬜ não iniciadas |
 
 **Câmera lateral (04/09, PC de casa):** a lógica do jogo NÃO mudou (eixo Z, lanes em x). A câmera fica no lado +X olhando para −X: base do jogador à esquerda, bot à direita, lanes em profundidade. `Config.camera` agora é `cameraSide/cameraDistance/cameraHeight/cameraSideOffset/cameraTarget*/cameraFov` (posição derivada em `CameraController.cameraPosition`). Decoração alta da Arena foi para o lado −X/além das bases. `visual.baseVisualScale` criada (1.0). Harness `test/*.mjs` portado para Windows (`executablePath` do playwright, `shell:true`, `VIEWPORT=`). Medido na RTX 3060: ~200 fps, 570–780 draw calls com 10–19 unidades.
 
-**Próximo passo concreto:** Philipe aprova visualmente a câmera (ou ajusta no lil-gui → COPIAR CONFIG → cola os valores) e confirma o plano; só então começar a **E1**. Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
+**E1 (04/09, PC de casa) — plano e câmera aprovados pelo Philipe.**
+- `core/TimeController.js`: única fonte de tempo. `update(rawDt)` → `gameDt` (unidades, bot, Capital, poderes, projéteis, cronômetro) e `visualDt` (bases, partículas; roda a `hitStopVisualRate` no hit-stop). UI/câmera/texto/perf usam `rawDt`. API: `hitStop(s, {force})` (só estende, orçamento `hitStopBudgetPerSecond`), `slowMotion(scale, hold, recovery)` (vários = menor scale, cada um expira), `setGameSpeed(v)` (escreve `Config.game.gameSpeed`), `reset()` (restart/menu). `Game.hitStop()` virou atalho; `finish()` usa `slowMotion` com `Config.time.matchEnd*`. `combat.hitStopDuration` = 0.045 (fica em `combat` porque Unit/Powers leem de lá).
+- `debug/PerfStats.js`: fps/avg/min (janela `perf.perfSampleWindow`), frame ms, draw calls, tris, units/proj/part/txt. Overlay `#perf-overlay` com `perf.showPerfOverlay` ou `?debug=1`. `game.perf.snapshot()` = JSON do botão COPY PERF SNAPSHOT.
+- `debug/StressTest.js`: `game.stress.run(n)` spawna n unidades reais (`debugSpawn=true`, times alternados, 3 lanes, fileiras a partir do spawn, sem Capital/cartas); `Base.takeDamage` ignora dano dessas unidades; `game.stress.clear()` remove só elas e limpa projéteis. lil-gui: pastas TIME / GAME FEEL (gameSpeed 0.25–3×, hit-stop, slow-mo, botões TEST HIT STOP / TEST SLOW MOTION / RESET TIME SCALE), PERFORMANCE, STRESS TEST 10/20/30/50/CLEAR.
+- Testes: `node test/time.mjs` (8 testes puros do TimeController), `node test/stress.mjs` (bench headed com GPU), `run.mjs`, `screens.mjs`. Bench RTX 3060 @1600×900: 10 → 199 fps / 672 calls · 20 → 198 / 913 · 30 → 153 / 1204 · 50 → 103 fps (mín 53) / 1701 calls / 177k tris. Gargalo = draw calls por boneco (~30 por unidade): próximo passo de perf, quando necessário, é InstancedMesh para militantes (NÃO fazer antes de medir de novo na E4).
+
+**Próximo passo concreto:** E2 (extração procedural), só depois de o Philipe aprovar o relatório da E1. Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 

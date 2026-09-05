@@ -6,12 +6,12 @@ import GUI from 'lil-gui';
 import { Config } from '../config/Config.js';
 
 const RANGES = {
-  game: { gameSpeed: [0.1, 6, 0.1], capitalRegen: [0.2, 5, 0.1], startingCapital: [0, 10, 1], maxCapital: [5, 20, 1], matchDuration: [30, 600, 5], botDifficulty: [0.2, 3, 0.1] },
+  game: { capitalRegen: [0.2, 5, 0.1], startingCapital: [0, 10, 1], maxCapital: [5, 20, 1], matchDuration: [30, 600, 5], botDifficulty: [0.2, 3, 0.1] },
   base: { baseHP: [500, 20000, 100], baseDamageFeedback: [0, 3, 0.1] },
   // câmera lateral: cameraSide é enum e entra fora do loop (ver build())
   camera: { cameraDistance: [8, 70, 0.5], cameraHeight: [0, 45, 0.5], cameraSideOffset: [-30, 30, 0.5], cameraFov: [15, 100, 1], cameraTargetX: [-20, 20, 0.5], cameraTargetY: [-2, 16, 0.1], cameraTargetZ: [-30, 30, 0.5], cameraShakeStrength: [0, 3, 0.1] },
   lanes: { laneSpacing: [4, 10, 0.5], laneWidth: [2, 8, 0.5], spawnOffset: [0, 10, 0.5], fieldLength: [30, 70, 1] },
-  combat: { globalDamageMultiplier: [0.1, 5, 0.05], globalHPMultiplier: [0.1, 5, 0.05], globalMoveSpeedMultiplier: [0.1, 4, 0.05], knockbackStrength: [0, 4, 0.1], hitStopDuration: [0, 0.3, 0.01], bigHitThreshold: [10, 300, 5] },
+  combat: { globalDamageMultiplier: [0.1, 5, 0.05], globalHPMultiplier: [0.1, 5, 0.05], globalMoveSpeedMultiplier: [0.1, 4, 0.05], knockbackStrength: [0, 4, 0.1], bigHitThreshold: [10, 300, 5] },
   bot: { botDecisionInterval: [0.3, 5, 0.1], botAggressiveness: [0, 2, 0.05], botDefenseBias: [0, 2, 0.05], botRandomness: [0, 1, 0.05] },
   visual: { characterScale: [0.4, 2.5, 0.05], baseVisualScale: [0.4, 3, 0.05], headScale: [0.8, 2.5, 0.05], particleAmount: [0, 3, 0.1], memeFrequency: [0, 3, 0.1] },
 };
@@ -55,6 +55,31 @@ export class DebugPanel {
       }
     }
     if (this.game.audio) gui.add(this.game.audio, 'volume', 0, 1, 0.05).name('volume').onChange(v => this.game.audio.setVolume(v));
+
+    // TIME / GAME FEEL (core/TimeController.js)
+    const g = this.game;
+    const t = gui.addFolder('TIME / GAME FEEL'); t.close();
+    const speedCtrl = t.add(Config.game, 'gameSpeed', { '0.25x': 0.25, '0.5x': 0.5, '1x': 1, '1.5x': 1.5, '2x': 2, '3x': 3 }).name('gameSpeed');
+    t.add(Config.combat, 'hitStopDuration', 0, 0.3, 0.005);
+    t.add(Config.time, 'hitStopBudgetPerSecond', 0, 1, 0.05);
+    t.add(Config.time, 'hitStopVisualRate', 0, 1, 0.01);
+    t.add(Config.time, 'slowMotionScale', 0.05, 1, 0.05);
+    t.add(Config.time, 'slowMotionDuration', 0, 3, 0.05);
+    t.add(Config.time, 'slowMotionRecovery', 0, 2, 0.05);
+    t.add({ f: () => g.time.hitStop(Config.combat.hitStopDuration, { force: true }) }, 'f').name('TEST HIT STOP');
+    t.add({ f: () => g.time.slowMotion(Config.time.slowMotionScale, Config.time.slowMotionDuration, Config.time.slowMotionRecovery) }, 'f').name('TEST SLOW MOTION');
+    t.add({ f: () => { g.time.reset(); g.time.setGameSpeed(1); speedCtrl.updateDisplay(); } }, 'f').name('RESET TIME SCALE');
+
+    // PERFORMANCE (debug/PerfStats.js)
+    const pf = gui.addFolder('PERFORMANCE'); pf.close();
+    pf.add(Config.perf, 'showPerfOverlay');
+    pf.add(Config.perf, 'perfSampleWindow', 0.5, 10, 0.5);
+    pf.add({ f: () => g.perf.copySnapshot() }, 'f').name('COPY PERF SNAPSHOT');
+
+    // STRESS TEST (debug/StressTest.js)
+    const st = gui.addFolder('STRESS TEST'); st.close();
+    for (const n of [10, 20, 30, 50]) st.add({ f: () => g.stress.run(n) }, 'f').name(`STRESS TEST ${n}`);
+    st.add({ f: () => g.stress.clear() }, 'f').name('CLEAR STRESS TEST');
 
     // DEBUG
     const d = gui.addFolder('DEBUG'); d.close();
