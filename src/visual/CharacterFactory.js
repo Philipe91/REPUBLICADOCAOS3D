@@ -4,7 +4,7 @@
 // 2) Senão → ProceduralCharacterVisual com a "spec" caricata do personagem.
 // A lógica (Unit.js) nunca sabe qual implementação recebeu.
 // ============================================================
-import { ProceduralCharacterVisual } from './ProceduralCharacterVisual.js';
+import { ProceduralCharacterVisual } from './procedural/ProceduralCharacterVisual.js';
 import { GLBCharacterVisual } from './GLBCharacterVisual.js';
 import { assetManager } from './AssetManager.js';
 import { TEAM_COLORS, Config } from '../config/Config.js';

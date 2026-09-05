@@ -19,6 +19,7 @@ export class GLBCharacterVisual extends CharacterVisual {
     this.clips = {};
     for (const c of gltf.animations) this.clips[c.name.toLowerCase()] = c;
     this.current = null;
+    this._impact = null;        // { t, cb } — fallback por timeout do onImpact (sem marcador no clip)
     this.baseScale = spec.scale ?? 1;
     this.extraScale = 1;
     const box = new THREE.Box3().setFromObject(this.object3d);
@@ -47,7 +48,10 @@ export class GLBCharacterVisual extends CharacterVisual {
   }
   playIdle() { this._play('idle'); }
   playWalk(f = 1) { this._play('walk', { timeScale: f }); }
-  playAttack(windup, duration) { const c = this.clips.attack; this._play('attack', { loop: false, timeScale: c ? c.duration / Math.max(0.1, duration) : 1 }); }
+  playAttack(windup, duration, { onImpact = null } = {}) {
+    const c = this.clips.attack; this._play('attack', { loop: false, timeScale: c ? c.duration / Math.max(0.1, duration) : 1 });
+    this._impact = onImpact ? { t: windup, cb: onImpact } : null;   // futuro: marcador de clip → mesmo callback
+  }
   playHit() { this._play('hit', { loop: false }); }
   playDeath() { this._play('death', { loop: false }); }
   playSpecial(kind) { this._play(`special_${kind}`) || this._play('special', { loop: false }); }
@@ -59,6 +63,9 @@ export class GLBCharacterVisual extends CharacterVisual {
   setScale(s) { this.extraScale = s; this._applyScale(); }
   flash() {}
   transform() {}
-  update(dt) { this.mixer.update(dt); }
+  update(dt) {
+    this.mixer.update(dt);
+    if (this._impact) { this._impact.t -= dt; if (this._impact.t <= 0) { const cb = this._impact.cb; this._impact = null; cb(); } }
+  }
   dispose() { this.scene.remove(this.object3d); }
 }

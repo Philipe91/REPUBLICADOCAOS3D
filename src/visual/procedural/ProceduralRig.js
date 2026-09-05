@@ -1,5 +1,7 @@
 // ============================================================
-// ProceduralCharacter — boneco cartunesco feito só com primitivas.
+// ProceduralRig — o BONECO (só construção): primitivas, materiais, partes com
+// pivô, pose de descanso e a transformação do MODO JURÁSSICO.
+// Não anima nada: quem move as partes é ProceduralAnimator + ProceduralAnimations.
 // Estrutura:
 //   root (facing / posição)
 //   └ model (offsets de animação)
@@ -8,10 +10,9 @@
 //      │   ├ head          (pivô no pescoço) → olhos, cabelo, barba, chapéu...
 //      │   ├ armL, armR    (pivô no ombro) → mão grande → weapon/accessory
 //      │   └ acessórios no tronco (gravata, capa, ring light, cauda...)
-// Animações: rotação/translação das partes a partir de uma pose de descanso.
 // ============================================================
 import * as THREE from 'three';
-import { G, mat, basicMat, textTexture } from '../core/Assets.js';
+import { G, mat, basicMat, textTexture } from '../../core/Assets.js';
 
 const DEFAULT_SPEC = {
   scale: 1,
@@ -38,7 +39,7 @@ const DEFAULT_SPEC = {
   mouth: 'smile',        // 'smile' | 'shout' | 'flat'
 };
 
-export class ProceduralCharacter {
+export class ProceduralRig {
   constructor(spec = {}, globalHeadScale = 1.4) {
     this.spec = { ...DEFAULT_SPEC, ...spec };
     this.globalHeadScale = globalHeadScale;
@@ -46,20 +47,9 @@ export class ProceduralCharacter {
     this.model = new THREE.Group();
     this.root.add(this.model);
     this.parts = {};
-    this.rest = {};
-    this.anim = 'idle';
-    this.animTime = 0;
-    this.attackWindup = 0.25;
-    this.attackDuration = 0.6;
-    this.walkFactor = 1;
-    this.hitT = 0;
-    this.hitStrength = 1;
-    this.flashT = 0;
-    this.specialKind = 'default';
-    this.specialDuration = 1;
-    this.stunned = false;
-    this.time = Math.random() * 10;
-    this.materials = [];
+    this.rest = {};          // pose de descanso por parte: { pos, rot, scale }
+    this.materials = [];     // clonados por boneco (flash individual via emissive)
+    this.jurassic = false;
     this.build();
   }
 
@@ -423,26 +413,11 @@ export class ProceduralCharacter {
     this.jurassic = true;
   }
 
-  // ---------------- API DE ANIMAÇÃO ----------------
-  setAnim(name, params = {}) {
-    if (this.anim === 'death') return;
-    if (name === this.anim && (name === 'idle' || name === 'walk')) { if (params.factor) this.walkFactor = params.factor; return; }
-    this.anim = name;
-    this.animTime = 0;
-    if (name === 'attack') { this.attackWindup = params.windup ?? 0.25; this.attackDuration = params.duration ?? 0.6; }
-    if (name === 'walk') this.walkFactor = params.factor ?? 1;
-    if (name === 'special') { this.specialKind = params.kind ?? 'default'; this.specialDuration = params.duration ?? 1; }
-  }
-
-  hit(strength = 1) { this.hitT = 0.3; this.hitStrength = strength; }
-  flash(color = 0xffffff, t = 0.1) { this.flashT = t; this.flashColor = color; }
-
-  // ---------------- UPDATE ----------------
-  update(dt) {
-    this.time += dt;
-    this.animTime += dt;
+  // ---------------- POSE ----------------
+  // Volta TODAS as partes e o `model` à pose de descanso. Chamado no início de cada
+  // frame pelo animator: nenhuma animação acumula transform sobre a anterior.
+  resetPose() {
     const P = this.parts, R = this.rest;
-    // volta à pose de descanso
     for (const k in R) {
       const o = P[k]; if (!o) continue;
       o.position.copy(R[k].pos); o.rotation.copy(R[k].rot); o.scale.copy(R[k].scale);
@@ -450,202 +425,11 @@ export class ProceduralCharacter {
     this.model.position.set(0, 0, 0);
     this.model.rotation.set(0, 0, 0);
     this.model.scale.set(1, 1, 1);
-
-    const t = this.animTime;
-    const T = this.time;
-    switch (this.anim) {
-      case 'idle': this._idle(T); break;
-      case 'walk': this._walk(T); break;
-      case 'attack': this._attack(t); break;
-      case 'special': this._special(t); break;
-      case 'victory': this._victory(T); break;
-      case 'stun': this._stun(T); break;
-      case 'recesso': this._recesso(T); break;
-      case 'death': this._death(t); break;
-    }
-    // overlay de hit
-    if (this.hitT > 0 && this.anim !== 'death') {
-      this.hitT -= dt;
-      const p = this.hitT / 0.3;
-      const s = this.hitStrength;
-      P.body.rotation.x += -0.5 * p * s;
-      this.model.position.z += -0.15 * p * s;
-      P.head.rotation.x += -0.4 * p * s;
-      P.armL.rotation.x += -1.2 * p * s; P.armR.rotation.x += -1.2 * p * s;
-      P.armL.rotation.z += -0.6 * p; P.armR.rotation.z += 0.6 * p;
-    }
-    // flash
-    if (this.flashT > 0) {
-      this.flashT -= dt;
-      const on = this.flashT > 0;
-      for (const m of this.materials) if (m.emissive) m.emissive.setHex(on ? this.flashColor : 0x000000);
-      if (!on) this._flashOff = true;
-    }
-    // cauda balança
-    if (P.tail) P.tail.rotation.y = Math.sin(T * 6) * 0.35;
-    if (P.cape) P.cape.rotation.x = 0.15 + Math.sin(T * 5) * 0.08 + (this.anim === 'walk' ? 0.25 : 0);
-    if (P.flag) P.flag.rotation.y = Math.sin(T * 8) * 0.25;
   }
 
-  _idle(T) {
-    const P = this.parts;
-    const b = Math.sin(T * 2.2);
-    this.model.position.y = b * 0.03;
-    P.body.scale.y = 1 + b * 0.02;
-    P.armL.rotation.z = -0.12 + Math.sin(T * 2.2) * 0.05;
-    P.armR.rotation.z = 0.12 - Math.sin(T * 2.2) * 0.05;
-    P.head.rotation.z = Math.sin(T * 1.1) * 0.06;
-    P.head.rotation.y = Math.sin(T * 0.7) * 0.15;
-  }
-
-  _walk(T) {
-    const P = this.parts;
-    const f = 9 * Math.max(0.3, this.walkFactor);
-    const s = Math.sin(T * f);
-    const c = Math.cos(T * f);
-    const amp = this.jurassic ? 0.5 : 0.7;
-    P.legL.rotation.x = s * amp; P.legR.rotation.x = -s * amp;
-    P.armL.rotation.x = -s * amp * 0.9; P.armR.rotation.x = s * amp * 0.9;
-    P.armL.rotation.z = -0.15; P.armR.rotation.z = 0.15;
-    this.model.position.y = Math.abs(c) * 0.08;
-    P.body.rotation.x = 0.12 + (this.rest.body.rot.x);
-    P.body.rotation.z = s * 0.06;
-    P.head.rotation.z = -s * 0.08;
-    P.head.rotation.x = -0.08;
-  }
-
-  _attack(t) {
-    const P = this.parts;
-    const w = this.attackWindup, d = this.attackDuration;
-    let lean = 0, armX = 0, lunge = 0, armZ = 0;
-    if (t < w) {                       // antecipação: recua e levanta o braço
-      const p = t / w;
-      const e = p * p;
-      lean = -0.35 * e; armX = -2.4 * e; lunge = -0.12 * e; armZ = 0.5 * e;
-    } else if (t < w + 0.14) {         // golpe: avança rápido
-      const p = (t - w) / 0.14;
-      const e = 1 - Math.pow(1 - p, 3);
-      lean = -0.35 + 1.0 * e; armX = -2.4 + 3.4 * e; lunge = -0.12 + 0.55 * e; armZ = 0.5 - 0.5 * e;
-    } else {                           // recuperação
-      const p = Math.min(1, (t - w - 0.14) / Math.max(0.1, d - w - 0.14));
-      const e = 1 - Math.pow(1 - p, 2);
-      lean = 0.65 * (1 - e); armX = 1.0 * (1 - e); lunge = 0.43 * (1 - e);
-    }
-    P.body.rotation.x = lean + this.rest.body.rot.x;
-    P.armR.rotation.x = armX; P.armR.rotation.z = armZ;
-    P.armL.rotation.x = -armX * 0.3; P.armL.rotation.z = -0.3;
-    this.model.position.z = lunge;
-    P.legL.rotation.x = -lunge * 0.8; P.legR.rotation.x = lunge * 0.8;
-    P.head.rotation.x = -lean * 0.4;
-    if (P.weapon) P.weapon.rotation.x = -armX * 0.2;
-  }
-
-  _special(t) {
-    const P = this.parts;
-    const d = this.specialDuration;
-    const p = Math.min(1, t / d);
-    switch (this.specialKind) {
-      case 'discurso': {  // levanta microfone, corpo empina, pulinho
-        P.armR.rotation.x = -2.8; P.armR.rotation.z = 0.3;
-        P.armL.rotation.x = -0.6 + Math.sin(t * 12) * 0.4; P.armL.rotation.z = -1.0;
-        P.body.rotation.x = -0.2; P.head.rotation.x = -0.4;
-        this.model.position.y = Math.abs(Math.sin(t * 10)) * 0.15;
-        P.mouth && (P.mouth.scale.y = 1.5);
-        break;
-      }
-      case 'motociata': { // aponta para frente, gesto exagerado
-        P.armR.rotation.x = -1.6; P.armL.rotation.x = -1.6; P.armL.rotation.z = -0.4; P.armR.rotation.z = 0.4;
-        P.body.rotation.x = 0.25; P.head.rotation.x = -0.2;
-        this.model.position.y = Math.abs(Math.sin(t * 14)) * 0.1;
-        break;
-      }
-      case 'suspenso': { // levanta a caneta gigante e bate
-        const e = p < 0.5 ? p * 2 : 1 - (p - 0.5) * 2;
-        P.armR.rotation.x = -3.0 * e; P.body.rotation.x = -0.3 * e + 0.6 * (1 - e) * (p > 0.5 ? 1 : 0);
-        P.head.rotation.x = -0.3 * e;
-        break;
-      }
-      case 'jurassico': { // rugido: cresce e balança
-        const g = 1 + Math.sin(p * Math.PI) * 0.25;
-        this.model.scale.set(g, g, g);
-        P.head.rotation.x = -0.6 * Math.sin(p * Math.PI);
-        P.armL.rotation.x = -1.5; P.armR.rotation.x = -1.5;
-        P.body.rotation.z = Math.sin(t * 25) * 0.08;
-        break;
-      }
-      case 'engajamento': { // segura celular pra cima e pula
-        P.armR.rotation.x = -3.0; P.armL.rotation.x = -3.0;
-        this.model.position.y = Math.abs(Math.sin(t * 12)) * 0.2;
-        P.head.rotation.z = Math.sin(t * 20) * 0.15;
-        break;
-      }
-      default: {
-        P.armR.rotation.x = -2.5; P.armL.rotation.x = -2.5;
-        this.model.position.y = Math.abs(Math.sin(t * 10)) * 0.2;
-      }
-    }
-  }
-
-  _victory(T) {
-    const P = this.parts;
-    const j = Math.abs(Math.sin(T * 6));
-    this.model.position.y = j * 0.35;
-    P.armL.rotation.x = -2.6 + Math.sin(T * 12) * 0.3; P.armR.rotation.x = -2.6 - Math.sin(T * 12) * 0.3;
-    P.armL.rotation.z = -0.5; P.armR.rotation.z = 0.5;
-    P.legL.rotation.x = -j * 0.5; P.legR.rotation.x = -j * 0.5;
-    P.head.rotation.z = Math.sin(T * 6) * 0.2;
-    P.body.rotation.z = Math.sin(T * 6) * 0.1;
-  }
-
-  _stun(T) {
-    const P = this.parts;
-    P.head.rotation.z = Math.sin(T * 9) * 0.35;
-    P.head.rotation.x = 0.25;
-    P.body.rotation.z = Math.sin(T * 9) * 0.12;
-    P.body.rotation.x = 0.15;
-    P.armL.rotation.z = -0.9; P.armR.rotation.z = 0.9;
-    P.armL.rotation.x = 0.3; P.armR.rotation.x = 0.3;
-  }
-
-  _recesso(T) {
-    // olha o celular / coça a cabeça / senta (variação por instância)
-    const P = this.parts;
-    const v = this.recessoVariant ?? (this.recessoVariant = Math.floor(Math.random() * 3));
-    if (v === 0) { // olhar celular
-      P.armR.rotation.x = -1.7; P.armR.rotation.z = -0.4; P.head.rotation.x = 0.55;
-      P.head.rotation.z = Math.sin(T * 2) * 0.05;
-    } else if (v === 1) { // coçar a cabeça
-      P.armR.rotation.x = -2.9; P.armR.rotation.z = 0.35 + Math.sin(T * 14) * 0.15; P.head.rotation.z = -0.25;
-      P.head.rotation.x = -0.1;
-    } else { // sentar
-      this.model.position.y = -this.legH * 0.75;
-      P.legL.rotation.x = -1.5; P.legR.rotation.x = -1.5;
-      P.body.rotation.x = 0.1; P.armL.rotation.x = -0.5; P.armR.rotation.x = -0.5;
-      P.head.rotation.y = Math.sin(T * 1.5) * 0.3;
-    }
-  }
-
-  _death(t) {
-    const P = this.parts;
-    const v = this.deathVariant ?? (this.deathVariant = Math.random() < 0.5 ? 0 : 1);
-    const p = Math.min(1, t / 0.9);
-    const e = 1 - Math.pow(1 - p, 3);
-    if (v === 0) { // tomba de costas com pulinho
-      this.model.rotation.x = -Math.PI / 2 * e;
-      this.model.position.y = Math.sin(p * Math.PI) * 0.6;
-      this.model.position.z = -0.4 * e;
-      P.armL.rotation.x = -2.5 * e; P.armR.rotation.x = -2.5 * e;
-      P.legL.rotation.x = -0.4 * e; P.legR.rotation.x = 0.6 * e;
-    } else { // gira e cai
-      this.model.rotation.y = Math.PI * 4 * e;
-      this.model.position.y = Math.sin(p * Math.PI) * 1.2;
-      this.model.rotation.z = Math.PI / 2 * e;
-      P.armL.rotation.z = -2.0 * e; P.armR.rotation.z = 2.0 * e;
-    }
-    if (t > 1.0) { // afunda no chão
-      const s = Math.max(0, 1 - (t - 1.0) / 0.5);
-      this.model.scale.setScalar(s);
-    }
+  // emissive em todos os materiais do boneco (flash de dano); `null` desliga
+  setEmissive(colorHex) {
+    for (const m of this.materials) if (m.emissive) m.emissive.setHex(colorHex == null ? 0x000000 : colorHex);
   }
 
   dispose() {

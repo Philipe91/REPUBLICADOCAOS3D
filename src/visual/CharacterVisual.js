@@ -1,19 +1,26 @@
 // ============================================================
 // CharacterVisual — INTERFACE comum entre a lógica da unidade e o visual.
 // Unit.js só fala com esta interface. Implementações:
-//   ProceduralCharacterVisual (primitivas Three.js)  ← agora
+//   visual/procedural/ProceduralCharacterVisual (primitivas Three.js)  ← agora
 //   GLBCharacterVisual (modelos do Blender + AnimationMixer) ← futuro
+// A lógica NUNCA sabe de braço, perna, cabeça, squash: só pede estados de alto nível.
+//
+// playAttack(windup, duration, { onImpact }) — `onImpact` é OPCIONAL: o visual chama o
+// callback uma vez no frame de golpe (procedural: t ≥ windup; GLB: marcador do clip ou
+// timeout = windup). Hoje a Unit não passa callback e aplica o dano pelo próprio timer;
+// a sincronia dano↔impacto entra na E5 e sempre terá fallback por timeout.
 // ============================================================
 export class CharacterVisual {
   constructor() { this.object3d = null; this.height = 2; }
   playIdle() {}
   playWalk(speedFactor = 1) {}
-  playAttack(windup = 0.25, duration = 0.6) {}
+  playAttack(windup = 0.25, duration = 0.6, { onImpact = null } = {}) {}
   playHit(strength = 1) {}
   playDeath() {}
   playSpecial(kind = 'default', duration = 1) {}
   playVictory() {}
   playStun(on) {}
+  playRecesso(on) {}
   setFacing(dirZ) {}          // -1 → olha para -z, +1 → olha para +z
   setPosition(x, y, z) {}
   setScale(s) {}

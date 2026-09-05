@@ -1,6 +1,6 @@
 # HANDOFF — continuar o projeto em outra máquina / nova conversa
 
-Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
+Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1 + E2). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
 
 ---
 
@@ -59,7 +59,8 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 | Câmera lateral (pré-E1, pedido do Philipe em 04/09) | ✅ implementada e commitada — aguarda aprovação VISUAL do Philipe |
 | Aprovação do plano pelo Philipe | ⏳ pendente (ele viu o resumo, ainda não disse "aprovado") |
 | E1 Fundação técnica (TimeController, PerfStats, Stress Test, chaves lil-gui) | ✅ concluída e commitada (04/09, PC de casa) |
-| E2..E12 | ⬜ não iniciadas |
+| E2 Extração procedural (visual/procedural/) | ✅ concluída e commitada (04/09, PC de casa) |
+| E3..E12 | ⬜ não iniciadas |
 
 **Câmera lateral (04/09, PC de casa):** a lógica do jogo NÃO mudou (eixo Z, lanes em x). A câmera fica no lado +X olhando para −X: base do jogador à esquerda, bot à direita, lanes em profundidade. `Config.camera` agora é `cameraSide/cameraDistance/cameraHeight/cameraSideOffset/cameraTarget*/cameraFov` (posição derivada em `CameraController.cameraPosition`). Decoração alta da Arena foi para o lado −X/além das bases. `visual.baseVisualScale` criada (1.0). Harness `test/*.mjs` portado para Windows (`executablePath` do playwright, `shell:true`, `VIEWPORT=`). Medido na RTX 3060: ~200 fps, 570–780 draw calls com 10–19 unidades.
 
@@ -69,7 +70,12 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 - `debug/StressTest.js`: `game.stress.run(n)` spawna n unidades reais (`debugSpawn=true`, times alternados, 3 lanes, fileiras a partir do spawn, sem Capital/cartas); `Base.takeDamage` ignora dano dessas unidades; `game.stress.clear()` remove só elas e limpa projéteis. lil-gui: pastas TIME / GAME FEEL (gameSpeed 0.25–3×, hit-stop, slow-mo, botões TEST HIT STOP / TEST SLOW MOTION / RESET TIME SCALE), PERFORMANCE, STRESS TEST 10/20/30/50/CLEAR.
 - Testes: `node test/time.mjs` (8 testes puros do TimeController), `node test/stress.mjs` (bench headed com GPU), `run.mjs`, `screens.mjs`. Bench RTX 3060 @1600×900: 10 → 199 fps / 672 calls · 20 → 198 / 913 · 30 → 153 / 1204 · 50 → 103 fps (mín 53) / 1701 calls / 177k tris. Gargalo = draw calls por boneco (~30 por unidade): próximo passo de perf, quando necessário, é InstancedMesh para militantes (NÃO fazer antes de medir de novo na E4).
 
-**Próximo passo concreto:** E2 (extração procedural), só depois de o Philipe aprovar o relatório da E1. Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
+**E2 (04/09, PC de casa) — refactor neutro, aparência e timing iguais.**
+- `src/visual/procedural/ProceduralRig.js`: SÓ o boneco (primitivas, materiais clonados, partes com pivô, pose de descanso, `transformJurassic`, `resetPose`, `setEmissive`). `ProceduralAnimations.js`: funções puras `(rig, tempo, params)` — idle/walk/attack/special/victory/stun/recesso/death/hitOverlay/secondary, fórmulas idênticas às antigas. `ProceduralAnimator.js`: estado (anim, tempos, variantes por instância, hit, flash) e a ordem por frame: resetPose → animação → hit sobreposto → flash → secundário. `ProceduralCharacterVisual.js` (adapter) mudou para essa pasta. `src/visual/ProceduralCharacter.js` e o adapter antigo foram removidos.
+- `CharacterVisual.playAttack(windup, duration, { onImpact })`: callback OPCIONAL; procedural dispara em t ≥ windup, GLB por timeout = windup (ou marcador de clip no futuro). Unit.js NÃO passa callback ainda (E5) e não mudou. `playRecesso` entrou na interface.
+- Validação: run.mjs, screens.mjs, e1.mjs (hit-stop, slow-mo, gameSpeed 2×, restart, stress 50) OK; capturas antes/depois em `test/shots/e2/` (lineup dos 8, combate, Jurássico) iguais; stress 30 → 161 fps / 1164 calls / 112k tris (E1: 153 / 1204 / 117k).
+
+**Próximo passo concreto:** E3 (UX Player vs Bot), só depois de o Philipe aprovar o relatório da E2. Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 
