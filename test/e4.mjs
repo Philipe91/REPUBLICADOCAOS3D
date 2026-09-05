@@ -23,8 +23,8 @@ const r = await ev(() => {
   const p0 = game.effects.particles.count;
   T.forEach((t, i) => { game.units.spawn(t, 'player', i % 3, { count: 1, z: 12 - Math.floor(i / 3) * 3 }); game.units.spawn(t, 'bot', i % 3, { count: 1, z: -12 + Math.floor(i / 3) * 3 }); });
   const alive = game.units.units.filter(u => u.alive).length;
-  const bands = game.units.units.filter(u => u.type !== 'militante').every(u => u.visual.rig.parts.teamBand);
-  const noBandMil = game.units.units.filter(u => u.type === 'militante').every(u => !u.visual.rig.parts.teamBand);
+  const bands = game.units.units.filter(u => u.type !== 'militante' && u.visual.rig).every(u => u.visual.rig.parts.teamBand);
+  const noBandMil = game.units.units.filter(u => u.type === 'militante').every(u => !u.visual.rig || !u.visual.rig.parts.teamBand);   // militante pode ser GLB
   const bandColor = (t) => { const u = game.units.units.find(x => x.team === t && x.type === 'capitao'); return u.visual.rig.parts.teamBand.material.color.getHex(); };
   return { alive, bands, noBandMil, pc: bandColor('player'), bc: bandColor('bot'), texts: game.effects.text.items.length, particles: game.effects.particles.count - p0 };
 });

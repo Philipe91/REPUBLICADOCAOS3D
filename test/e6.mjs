@@ -33,12 +33,12 @@ const r = await ev(() => {
   const T = ['barbudo', 'capitao', 'careca', 'dino', 'tiozap', 'assessor', 'influencer'];
   const out = {};
   T.forEach((t, i) => { const [u] = game.units.spawn(t, 'player', i % 3, { count: 1, z: 12 - i }); const p = u.visual.animator.profile; out[t] = { gesture: p.gesture, tempo: p.tempo, rigidity: p.rigidity, ok: Object.values(p).every(v => v === null || typeof v === 'number' || typeof v === 'string') }; });
-  const horde = game.units.spawn('militante', 'bot', 1, { count: 5 });
+  const horde = game.units.spawn('fiel', 'bot', 1, { count: 5 });   // horda procedural com jitter (militante e GLB)
   const tempos = horde.map(u => +u.visual.animator.profile.tempo.toFixed(3));
   return { out, tempos, distinct: new Set(tempos).size, gestures: new Set(T.map(t => out[t].gesture)).size };
 });
 check('7 personagens com perfil (só dados) e gestos distintos', Object.values(r.out).every(o => o.ok && o.gesture) && r.gestures === 7, JSON.stringify(r.out));
-check('militantes da mesma horda com tempos diferentes (jitter)', r.distinct >= 4, JSON.stringify(r.tempos));
+check('fieis da mesma horda com tempos diferentes (jitter)', r.distinct >= 4, JSON.stringify(r.tempos));
 
 // gesto dispara no idle e termina, sem quebrar a pose (reset por frame)
 const g = await ev(() => new Promise(res => {
@@ -54,7 +54,7 @@ const g = await ev(() => new Promise(res => {
 check('gesto "phone" do Tio do Zap dispara no idle e volta à pose', !g.timeout && g.seen === 'phone' && g.maxArm > 0.8 && g.armAfter < 0.3 && g.anim === 'idle', JSON.stringify(g));
 
 // walk/attack/idle continuam funcionando com perfil (sem NaN)
-const nan = await ev(() => { game.units.clear(); const T = ['barbudo', 'capitao', 'careca', 'dino', 'tiozap', 'assessor', 'influencer', 'militante']; let bad = 0; for (const t of T) { const [u] = game.units.spawn(t, 'bot', 0, { count: 1 }); for (const a of ['idle', 'walk', 'attack', 'victory', 'stun', 'recesso']) { u.visual.animator.setAnim(a, { windup: 0.25, duration: 0.6, factor: 1 }); for (let i = 0; i < 10; i++) u.visual.update(0.05); const m = u.visual.rig.model; if ([m.position.x, m.position.y, m.rotation.x, u.visual.rig.parts.armR.rotation.x].some(v => Number.isNaN(v))) bad++; } } return bad; });
+const nan = await ev(() => { game.units.clear(); const T = ['barbudo', 'capitao', 'careca', 'dino', 'tiozap', 'assessor', 'influencer', 'militante']; let bad = 0; for (const t of T) { const [u] = game.units.spawn(t, 'bot', 0, { count: 1 }); if (!u.visual.animator) continue; for (const a of ['idle', 'walk', 'attack', 'victory', 'stun', 'recesso']) { u.visual.animator.setAnim(a, { windup: 0.25, duration: 0.6, factor: 1 }); for (let i = 0; i < 10; i++) u.visual.update(0.05); const m = u.visual.rig.model; if ([m.position.x, m.position.y, m.rotation.x, u.visual.rig.parts.armR.rotation.x].some(v => Number.isNaN(v))) bad++; } } return bad; });
 check('nenhum NaN em idle/walk/attack/victory/stun/recesso com perfis', nan === 0, `bad=${nan}`);
 
 console.log('errors:', errors.length ? errors.join('\n') : 'none');

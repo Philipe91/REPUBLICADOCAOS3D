@@ -1,6 +1,6 @@
 # HANDOFF — continuar o projeto em outra máquina / nova conversa
 
-Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E12 + ELENCO 2). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
+Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E12 + ELENCO 2 + piloto Blender). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
 
 ---
 
@@ -131,7 +131,15 @@ O projeto 2D em Godot (`D:\projeto-novo`, repo Philipe91/Republicadocaos) tem sp
 
 Visual: `visual/procedural/Props.js` (novo) recebeu as armas/acessórios do Rig + laço, chapéu, faixa, apito, violão, pneu e livro. Perfis e gestos em `Profiles.js`; animações dos especiais novos em `ProceduralAnimations.special`. Decks padrão NÃO mudaram (as cartas novas entram pelo MONTAR DECK). Teste: `test/elenco.mjs`; capturas em `test/shots/elenco/`. Balanceamento das cartas novas: medido com `test/e12.mjs` (aceita decks por argv[6]/[7]): valores iniciais perdiam 6/6 nos dois sentidos; após duas rodadas de reforço (Mascote 1000/55, Agro Boy 500/36, Coach 560/30, Pastor 450 + 3 fiéis de 80/10, Pneus 250/44, Maconheiro 340/18, Músico 360/26) o HP final ficou ~3800×4200 e ~3600×3800 — perto da paridade, ainda um pouco abaixo do deck antigo.
 
-**Próximo passo concreto:** Philipe joga uma partida manual (Player vs Bot), ajusta pelo lil-gui o que sentir (Motociata, Capital, câmera, elenco novo) e cola o COPIAR CONFIG; depois decidir InstancedMesh e o início dos modelos Blender (a interface CharacterVisual/GLBCharacterVisual já aceita playAttack onImpact e playDeath por força). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
+## BLENDER (05/09, PC de casa — piloto do fluxo Blender → GLB → jogo)
+
+- Blender 5.2.1 LTS portátil em `%LOCALAPPDATA%\Programs\Blender\blender.exe` (o MSI do winget pede UAC; o zip não). Headless: `blender.exe -b -P tools/blender/<personagem>.py -- public/models/<tipo>.glb`.
+- `tools/blender/charlib.py`: materiais Principled (o glTF só exporta cor de nós; material "TEAM…" recebe a cor do time no jogo), primitivas suavizadas com bevel, hierarquia por Empties (root > body > head/armL/armR; root > legL/legR — igual ao rig procedural, sem armature), `clip()` grava Actions por objeto e empurra para NLA tracks (viram clipes glTF por nome), `export()`. Convenção: Z cima, boneco olha para -Y (vira +Z no jogo), pés no z = 0, ~1.7 m para bodyType normal.
+- `tools/blender/militante.py`: primeiro personagem (boné e camisa do time, placa, 8 clipes: idle, walk, attack, hit, death, victory, stun, special). **`public/models/militante.glb` está no jogo**: o AssetManager troca o militante procedural pelo GLB automaticamente (os outros tipos continuam procedurais).
+- `GLBCharacterVisual`: materiais clonados por instância, tint TEAM, flash por emissive, `_play` devolve false quando o clipe não existe (fallbacks: special_<kind> → special → idle; stun/victory/recesso → idle), walk com timeScale mínimo 0.5. Pendente: `transform('jurassic')` para GLB (trocar modelo ou clip), marcador de impacto no clip (hoje timeout = windup).
+- Teste: `test/glb.mjs` (pula se não houver GLB). Captura: `test/shots/glb_militante_v1.png`. Próximos: Barbudo, Capitão, Careca, Dino, com as referências que o Sol gerar em `art_ref/<personagem>/`.
+
+**Próximo passo concreto:** Philipe joga uma partida manual (Player vs Bot), ajusta pelo lil-gui o que sentir e cola o COPIAR CONFIG; Sol gera as folhas de modelo (frente/lado/costas + pose característica) em `art_ref/`; seguir com Barbudo → Capitão → Careca → Dino em `tools/blender/`. Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 

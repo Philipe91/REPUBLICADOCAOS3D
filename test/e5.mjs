@@ -25,7 +25,7 @@ await ev(() => {
 });
 // instrumentação: embrulha Unit.prototype (_impact / _hit / takeDamage / die) para registrar o frame de cada evento
 await ev(() => new Promise(res => {
-  const proto = Object.getPrototypeOf(game.units.spawn('militante', 'player', 1, { count: 1 })[0]);
+  const proto = Object.getPrototypeOf(game.units.spawn('fiel', 'player', 1, { count: 1 })[0]);
   game.units.clear();
   const frame = () => game.renderer.info.render.frame;
   const oi = proto._impact;
@@ -39,12 +39,12 @@ await ev(() => new Promise(res => {
   res();
 }));
 
-// ---- 1. arena de teste: militante (sem especial → cadência limpa) x careca "saco de pancada" com HP gigante ----
+// ---- 1. arena de teste: fiel (procedural, sem especial → cadência limpa) x careca "saco de pancada" com HP gigante ----
 // boneco de treino: HP infinito, stunado (não revida) e sem knockback global (senão o alvo sai do alcance e o golpe vai no vazio)
-const setup = `game.units.clear(); Config.combat.knockbackStrength = 0; const [a] = game.units.spawn('militante', 'player', 1, { count: 1, z: 1.2 }); const [d] = game.units.spawn('careca', 'bot', 1, { count: 1, z: -0.2 }); d.maxHp = d.hp = 1e9; d.stunned = 1e9; a.maxHp = a.hp = 1e9; window.__a = a; window.__d = d;`;
+const setup = `game.units.clear(); Config.combat.knockbackStrength = 0; const [a] = game.units.spawn('fiel', 'player', 1, { count: 1, z: 1.2 }); const [d] = game.units.spawn('careca', 'bot', 1, { count: 1, z: -0.2 }); d.maxHp = d.hp = 1e9; d.stunned = 1e9; a.maxHp = a.hp = 1e9; window.__a = a; window.__d = d;`;
 await ev((s) => eval(s), setup);
 await ev(() => { window.__t0 = game.matchTime; window.__d.hp0 = window.__d.hp; });
-await waitGame(34);
+await waitGame(38);
 const r1 = await ev(() => {
   const L = window.__log; const a = window.__a, d = window.__d;
   const melee = L.impacts.filter(i => i.id === a.id && !i.ranged && i.target !== null);
@@ -65,7 +65,7 @@ const r1 = await ev(() => {
 check('≥ 50 amostras: attackImpact e unitDamaged no MESMO frame', r1.impacts >= 50 && r1.sameFrame === r1.impacts, JSON.stringify(r1));
 check('exatamente 1 dano por ataque', r1.dmg === r1.impacts, `${r1.dmg} danos / ${r1.impacts} impactos`);
 check('DPS efetivo dentro de ±10% do teórico', Math.abs(r1.dps - r1.theo) / r1.theo <= 0.10, `dps=${r1.dps} teórico=${r1.theo}`);
-check('militante (8 dano) é light (< mediumHitThreshold)', r1.strengths.length === 1 && r1.strengths[0] === 'light', JSON.stringify(r1.strengths));
+check('fiel (10 dano) é light (< mediumHitThreshold)', r1.strengths.length === 1 && r1.strengths[0] === 'light', JSON.stringify(r1.strengths));
 
 // ---- 2. fallback: visual que NÃO chama onImpact → dano por timeout, ainda 1 por ataque ----
 await ev((s) => eval(s), setup);
@@ -79,7 +79,7 @@ await ev(() => { Config.combat.knockbackStrength = 1; });
 const r3 = await ev(() => new Promise(res => {
   game.units.clear(); window.__log.impacts.length = 0;
   const [a] = game.units.spawn('careca', 'player', 1, { count: 1, z: 1.2 });
-  const [v] = game.units.spawn('militante', 'bot', 1, { count: 1, z: -0.2 });
+  const [v] = game.units.spawn('fiel', 'bot', 1, { count: 1, z: -0.2 });
   const [v2] = game.units.spawn('capitao', 'bot', 1, { count: 1, z: -3 }); v2.maxHp = v2.hp = 1e9;
   const id = setInterval(() => {
     if (a.state === 'ATTACKING' && !a.attackHitDone && a.target === v) { v.takeDamage(9999, null); clearInterval(id);
@@ -99,12 +99,12 @@ const r5 = await ev(() => {
   const seen = new Set(); const byStrength = {};
   for (const s of ['light', 'medium', 'heavy', 'special']) {
     byStrength[s] = new Set();
-    for (let i = 0; i < 40; i++) { const [u] = game.units.spawn('militante', 'bot', i % 3, { count: 1 }); u.visual.playDeath(s); const v = u.visual.animator.deathVariant; seen.add(v); byStrength[s].add(v); u.alive = false; }
+    for (let i = 0; i < 40; i++) { const [u] = game.units.spawn('fiel', 'bot', i % 3, { count: 1 }); u.visual.playDeath(s); const v = u.visual.animator.deathVariant; seen.add(v); byStrength[s].add(v); u.alive = false; }
     game.units.clear();
   }
   // knockback de morte: militante (small) x capitão
   const [k] = game.units.spawn('capitao', 'player', 1, { count: 1, z: 0.5 });
-  const [m] = game.units.spawn('militante', 'bot', 1, { count: 1, z: -0.5 });
+  const [m] = game.units.spawn('fiel', 'bot', 1, { count: 1, z: -0.5 });
   const [c] = game.units.spawn('careca', 'bot', 1, { count: 1, z: -0.5 });
   m.takeDamage(9999, k); c.takeDamage(9999, k);
   return { variants: [...seen].sort(), light: [...byStrength.light].sort(), heavy: [...byStrength.heavy].sort(), kbSmall: Math.abs(m.kb.z), kbBig: Math.abs(c.kb.z) };
