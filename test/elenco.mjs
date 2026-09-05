@@ -56,7 +56,7 @@ const pa = await ev(() => eval(`
   const fieis = game.units.units.filter(u => u.type === 'fiel' && u.team === 'player');
   p.behavior.onUpdate(p, 0.05); const spd = fieis.length ? fieis[0].moveSpeed / Config.units.fiel.moveSpeed : 0;
   ({ ok, added: game.units.count - n0, fieis: fieis.length, owner: fieis.every(f => f.data.pastorId === p.id), spd: +spd.toFixed(2), small: fieis[0] && fieis[0].isSmall })`));
-check('PASTOR: invoca 2 FIÉIS (horda pequena) e PREGAÇÃO +20% veloc.', pa.ok && pa.added === 2 && pa.fieis === 2 && pa.owner && Math.abs(pa.spd - 1.2) < 0.01 && pa.small, JSON.stringify(pa));
+check('PASTOR: invoca FIÉIS (fieisPorInvocacao) e PREGAÇÃO +20% veloc.', pa.ok && pa.added === 3 && pa.fieis === 3 && pa.owner && Math.abs(pa.spd - 1.2) < 0.01 && pa.small, JSON.stringify(pa));
 
 // ---- PNEUS: projétil rasteiro que acerta ----
 const pn = await ev(() => new Promise(res => { game.units.clear(); const s = mk('pneus', 'player', 0, 4); const e = mk('careca', 'bot', 0, -1, { freeze: true }); const hp0 = e.hp; let seen = null; const id = setInterval(() => { const pr = game.effects.projectiles.active[0]; if (pr && seen === null) seen = { kind: pr.kind, y: +pr.group.position.y.toFixed(2), ground: pr.ground }; if (e.hp < hp0) { clearInterval(id); res({ seen, dealt: hp0 - e.hp }); } }, 20); setTimeout(() => { clearInterval(id); res({ timeout: true, seen }); }, 20000); }));
@@ -78,11 +78,11 @@ const mu = await ev(() => eval(`
   const e = mk('capitao', 'bot', 1, -1, { hp: 1000, freeze: true }); const hp0 = e.hp;
   const ok = m.behavior.trySpecial(m);
   ({ ok, dealt: hp0 - e.hp, kbz: +e.kb.z.toFixed(2) })`));
-check('MÚSICO: ACORDE dá 12 de dano e empurra para longe', mu.ok && mu.dealt === 12 && mu.kbz < 0, JSON.stringify(mu));
+check('MÚSICO: ACORDE dá acordeDamage (25) e empurra para longe', mu.ok && mu.dealt === 25 && mu.kbz < 0, JSON.stringify(mu));
 
 // ---- MASCOTE: tombamento ----
 const ms = await ev(() => new Promise(res => { game.units.clear(); const m = mk('mascote', 'player', 2, 4); m.specialCooldown = 0; const e = mk('careca', 'bot', 2, 0, { hp: 1000, freeze: true }); const e2 = mk('militante', 'bot', 2, -2, { hp: 1000, freeze: true }); const z0 = m.pos.z; const ok = m.behavior.trySpecial(m); const id = setInterval(() => { if (m.state !== 'SPECIAL') { clearInterval(id); res({ ok, moved: +(z0 - m.pos.z).toFixed(2), hit1: 1000 - e.hp, hit2: 1000 - e2.hp, kind: m.specialKind }); } }, 20); setTimeout(() => { clearInterval(id); res({ timeout: true }); }, 20000); }));
-check('MASCOTE: TOMBAMENTO avança ~7 e atropela os dois inimigos (60 cada, 1 vez)', !ms.timeout && ms.ok && ms.moved > 4 && ms.hit1 === 60 && ms.hit2 === 60, JSON.stringify(ms));
+check('MASCOTE: TOMBAMENTO avança ~7 e atropela os dois inimigos (90 cada, 1 vez)', !ms.timeout && ms.ok && ms.moved > 4 && ms.hit1 === 90 && ms.hit2 === 90, JSON.stringify(ms));
 
 // ---- Bot joga as cartas novas; partida bot vs bot termina ----
 await ev(() => { game.screens.hideAll(); Config.bot.botAggressiveness = 0.6; Config.bot.botDefenseBias = 0.7; Config.bot.botRandomness = 0.3; Config.debug.autoPlayer = true; Config.game.capitalRegen = 1.5; Config.game.gameSpeed = 6; Config.game.matchDuration = 20; const N = ['agroboy', 'coach', 'pastor', 'pneus', 'maconheiro', 'musico', 'mascote', 'militantes']; game.startMatch(N); game.botCtrl.deck.all = N.slice(); game.botCtrl.deck.reset(); });

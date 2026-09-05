@@ -170,14 +170,15 @@ export const Config = {
     dino:      { hp: 1300, damage: 45, moveSpeed: 1.0, attackSpeed: 0.7, attackRange: 1.7, cost: 7, spawnCount: 1, knockback: 1.0, scale: 1.3, jurassicDamageMult: 1.8, jurassicKnockbackMult: 2.2, jurassicSpeedMult: 0.7, jurassicScale: 1.35, jurassicDuration: 1.1, jurassicInvulnerable: 1 },   // invulnerável durante a transformação (1 = sim)
     moto:      { hp: 1,    damage: 70, moveSpeed: 16,  attackSpeed: 0,   attackRange: 1.2, cost: 0, spawnCount: 3, knockback: 2.5, scale: 1.0 },
     // ---- ELENCO 2 (adaptado do projeto 2D: mecânicas viraram passiva/especial por dados) ----
-    agroboy:   { hp: 380,  damage: 26, moveSpeed: 2.0, attackSpeed: 1.0, attackRange: 1.5, cost: 4, spawnCount: 1, knockback: 0.5, scale: 1.05, specialCooldown: 8, lacoRange: 6.5, lacoPull: 9, lacoStun: 0.45 },
-    coach:     { hp: 420,  damage: 24, moveSpeed: 2.1, attackSpeed: 1.8, attackRange: 1.3, cost: 4, spawnCount: 1, knockback: 0.4, scale: 1.1,  specialCooldown: 10, motivacaoRadius: 4.5, motivacaoBonus: 0.25, motivacaoDuration: 5, motivacaoVulnerable: 0.5 },
-    pastor:    { hp: 320,  damage: 12, moveSpeed: 1.6, attackSpeed: 0.8, attackRange: 1.4, cost: 5, spawnCount: 1, knockback: 0.3, scale: 1.05, specialCooldown: 9, fieisPorInvocacao: 2, fieisMax: 6, pregacaoRadius: 4, pregacaoBonus: 0.2 },
-    fiel:      { hp: 55,   damage: 7,  moveSpeed: 3.0, attackSpeed: 1.5, attackRange: 1.1, cost: 0, spawnCount: 1, knockback: 0.2, scale: 0.72, small: 1, swarm: 1 },
-    pneus:     { hp: 200,  damage: 30, moveSpeed: 1.7, attackSpeed: 0.7, attackRange: 7.5, cost: 3, spawnCount: 1, knockback: 1.0, scale: 1.0,  projectileSpeed: 9, projectile: 'pneu', projectileGround: 1 },
-    maconheiro:{ hp: 260,  damage: 10, moveSpeed: 1.6, attackSpeed: 0.8, attackRange: 1.4, cost: 3, spawnCount: 1, knockback: 0.2, scale: 1.0,  specialCooldown: 9, nuvemRadius: 4, nuvemSlow: 0.5, nuvemDuration: 4 },
-    musico:    { hp: 280,  damage: 18, moveSpeed: 1.9, attackSpeed: 1.1, attackRange: 1.5, cost: 3, spawnCount: 1, knockback: 0.3, scale: 1.0,  specialCooldown: 8, acordeRadius: 4, acordeDamage: 12, acordeKnockback: 1.8 },
-    mascote:   { hp: 700,  damage: 40, moveSpeed: 1.4, attackSpeed: 0.6, attackRange: 1.6, cost: 5, spawnCount: 1, knockback: 0.8, scale: 1.25, specialCooldown: 10, tombamentoRange: 7, tombamentoSpeed: 9, tombamentoDamage: 60, tombamentoKnockback: 2.0 },
+    // valores medidos com test/e12.mjs (deck novo vs deck padrão do bot, 6 partidas por sentido): HP final ~3800 x ~4200 e ~3600 x ~3800
+    agroboy:   { hp: 500,  damage: 36, moveSpeed: 2.0, attackSpeed: 1.0, attackRange: 1.5, cost: 4, spawnCount: 1, knockback: 0.5, scale: 1.05, specialCooldown: 8, lacoRange: 6.5, lacoPull: 9, lacoStun: 0.45 },
+    coach:     { hp: 560,  damage: 30, moveSpeed: 2.1, attackSpeed: 1.8, attackRange: 1.3, cost: 4, spawnCount: 1, knockback: 0.4, scale: 1.1,  specialCooldown: 10, motivacaoRadius: 4.5, motivacaoBonus: 0.25, motivacaoDuration: 5, motivacaoVulnerable: 0.5 },
+    pastor:    { hp: 450,  damage: 12, moveSpeed: 1.6, attackSpeed: 0.8, attackRange: 1.4, cost: 5, spawnCount: 1, knockback: 0.3, scale: 1.05, specialCooldown: 9, fieisPorInvocacao: 3, fieisMax: 6, pregacaoRadius: 4, pregacaoBonus: 0.2 },
+    fiel:      { hp: 80,   damage: 10,  moveSpeed: 3.0, attackSpeed: 1.5, attackRange: 1.1, cost: 0, spawnCount: 1, knockback: 0.2, scale: 0.72, small: 1, swarm: 1 },
+    pneus:     { hp: 250,  damage: 44, moveSpeed: 1.7, attackSpeed: 0.7, attackRange: 7.5, cost: 3, spawnCount: 1, knockback: 1.0, scale: 1.0,  projectileSpeed: 9, projectile: 'pneu', projectileGround: 1 },
+    maconheiro:{ hp: 340,  damage: 18, moveSpeed: 1.6, attackSpeed: 0.8, attackRange: 1.4, cost: 3, spawnCount: 1, knockback: 0.2, scale: 1.0,  specialCooldown: 9, nuvemRadius: 4, nuvemSlow: 0.5, nuvemDuration: 4 },
+    musico:    { hp: 360,  damage: 26, moveSpeed: 1.9, attackSpeed: 1.1, attackRange: 1.5, cost: 3, spawnCount: 1, knockback: 0.3, scale: 1.0,  specialCooldown: 8, acordeRadius: 4, acordeDamage: 25, acordeKnockback: 1.8 },
+    mascote:   { hp: 1000, damage: 55, moveSpeed: 1.4, attackSpeed: 0.6, attackRange: 1.6, cost: 5, spawnCount: 1, knockback: 0.8, scale: 1.25, specialCooldown: 10, tombamentoRange: 7, tombamentoSpeed: 9, tombamentoDamage: 90, tombamentoKnockback: 2.0 },
   },
 
   // ---------- PODERES (cartas instantâneas) ----------

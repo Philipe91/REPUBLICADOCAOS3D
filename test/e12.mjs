@@ -37,8 +37,9 @@ const playMatch = (deckP, deckB) => ev(({ deckP, deckB }) => new Promise(res => 
   }, 200);
 }), { deckP, deckB });
 
-const P = ['militantes', 'tiozap', 'assessor', 'influencer', 'barbudo', 'capitao', 'careca', 'canetada'];
-const B = ['militantes', 'tiozap', 'assessor', 'influencer', 'capitao', 'dino', 'motociata', 'careca'];
+const P = process.argv[6] ? process.argv[6].split(',') : ['militantes', 'tiozap', 'assessor', 'influencer', 'barbudo', 'capitao', 'careca', 'canetada'];
+const B = process.argv[7] ? process.argv[7].split(',') : ['militantes', 'tiozap', 'assessor', 'influencer', 'capitao', 'dino', 'motociata', 'careca'];   // argv[6]/[7]: decks customizados (lista separada por vírgula)
+if (process.argv[6] || process.argv[7]) console.log('decks:', P.join(','), 'vs', B.join(','));
 
 // ---- A) espelho ----
 const mirror = [];
