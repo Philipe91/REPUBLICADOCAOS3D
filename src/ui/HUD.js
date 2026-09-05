@@ -18,7 +18,10 @@ export class HUD {
     this.timer = document.getElementById('timer');
     this.phase = document.getElementById('phase-label');
     this.laneHint = document.getElementById('lane-hint');
+    this.toast = document.getElementById('card-toast');
     this._pipCount = -1;
+    this._lastPlayerCapital = -1;
+    this._toastTimer = null;
     this._cache = {};
     this.buildPips();
   }
@@ -41,7 +44,31 @@ export class HUD {
     el[prop] = value;
   }
 
-  setLaneHint(text) { this.laneHint.textContent = text || ''; this.laneHint.classList.toggle('show', !!text); }
+  setLaneHint(text, isLaneName = false) {
+    this.laneHint.textContent = text || '';
+    this.laneHint.classList.toggle('show', !!text);
+    this.laneHint.classList.toggle('lane', isLaneName);
+  }
+
+  // aviso curto acima da mão (ex.: "CAPITAL INSUFICIENTE · FALTA 3")
+  showToast(text) {
+    const el = this.toast;
+    el.textContent = text;
+    el.style.setProperty('--toast-dur', `${Config.ui.toastDuration}s`);
+    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => el.classList.remove('show'), Config.ui.toastDuration * 1000);
+  }
+
+  // Capital "nega" a jogada: número e pips tremem em vermelho
+  flashCapitalDenied() {
+    const ms = Config.ui.denyFlashDuration * 1000;
+    for (const el of [this.capitalText, this.capitalPips]) {
+      el.style.setProperty('--deny-dur', `${Config.ui.denyFlashDuration}s`);
+      el.classList.remove('denied'); void el.offsetWidth; el.classList.add('denied');
+      setTimeout(() => el.classList.remove('denied'), ms);
+    }
+  }
 
   update() {
     const g = this.game;
@@ -56,6 +83,12 @@ export class HUD {
     this._pips(this.botCapitalPips, g.botCtrl.capital, g.botCtrl.regenProgress);
     this._set('cap', this.capitalText, 'textContent', `${g.player.capital} / ${Config.game.maxCapital}`);
     this.capitalText.classList.toggle('full', g.player.capital >= Config.game.maxCapital);
+    // pulso discreto a cada ponto ganho (não no gasto, não no reset)
+    const cap = g.player.capital;
+    if (Config.ui.capitalTickPulse && this._lastPlayerCapital >= 0 && cap > this._lastPlayerCapital && cap < Config.game.maxCapital) {
+      this.capitalText.classList.remove('tick'); void this.capitalText.offsetWidth; this.capitalText.classList.add('tick');
+    }
+    this._lastPlayerCapital = cap;
 
     const t = g.timeLeft;
     const m = Math.floor(Math.max(0, t) / 60), s = Math.floor(Math.max(0, t) % 60);

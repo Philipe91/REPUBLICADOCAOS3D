@@ -20,7 +20,8 @@ await page.screenshot({ path: 'test/shots/select.png' });
 // ponto de clique = centro da lane do meio (lane 1) projetado pela câmera atual (vale para qualquer câmera)
 const pt = await page.evaluate(() => { const v = new game.cameraObj.position.constructor(game.arena.laneX(1), 0, 6).project(game.cameraObj); return { x: (v.x + 1) / 2 * innerWidth, y: (1 - v.y) / 2 * innerHeight }; });
 await page.mouse.click(pt.x, pt.y); await page.waitForTimeout(1500);
-const st = await page.evaluate(() => ({ units: game.units.count, playerLanes: game.units.units.filter(u => u.team === 'player').map(u => u.lane), cap: game.player.capital, sel: game.player.selected }));
+const st = await page.evaluate(() => ({ played: game.player.cardsPlayed, units: game.units.count, playerLanes: game.units.units.filter(u => u.team === 'player').map(u => u.lane), cap: game.player.capital, sel: game.player.selected }));
+if (st.played !== 1) { console.log('FAIL: jogada manual não registrou carta jogada'); process.exitCode = 1; }
 console.log('after manual play:', JSON.stringify(st));
 await page.screenshot({ path: 'test/shots/played.png' });
 await page.evaluate(() => game.finish(true)); await page.waitForFunction(() => !document.getElementById('end-screen').classList.contains('hidden'), null, { timeout: 60000 }); await page.waitForTimeout(500);

@@ -266,13 +266,15 @@ export class Arena {
     this._t = (this._t || 0) + dt;
   }
 
+  // lane sob o mouse: dourada e forte; demais lanes: leve, só enquanto se escolhe (Config.ui)
   setLaneHighlight(hovered, selecting) {
     for (let i = 0; i < 3; i++) {
       const m = this.laneHighlights[i].material;
-      let o = 0;
-      if (selecting) o = 0.12;
-      if (hovered === i) o = 0.35;
-      m.opacity = o;
+      const hot = hovered === i;
+      const o = hot ? Config.ui.laneHoverOpacity : selecting ? Config.ui.laneSelectOpacity : 0;
+      if (m.opacity !== o) m.opacity = o;
+      const c = hot ? 0xffd23f : 0xffffff;
+      if (m.color.getHex() !== c) m.color.setHex(c);
     }
   }
 

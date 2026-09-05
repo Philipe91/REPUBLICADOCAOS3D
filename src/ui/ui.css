@@ -47,14 +47,28 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 
 #lane-hint { position: absolute; bottom: 190px; left: 50%; transform: translateX(-50%); font-family: 'Bangers', cursive; font-size: 26px; color: #fff; text-shadow: 2px 2px 0 #000; letter-spacing: 2px; opacity: 0; transition: opacity 0.2s; }
 #lane-hint.show { opacity: 1; }
+#lane-hint.lane { color: var(--gold); }
+#card-toast { position: absolute; bottom: 236px; left: 50%; transform: translateX(-50%) scale(0.8); font-family: 'Bangers', cursive; font-size: 28px; color: #ff5a5a; text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; letter-spacing: 2px; white-space: nowrap; opacity: 0; pointer-events: none; }
+#card-toast.show { animation: toastPop var(--toast-dur, 0.9s) cubic-bezier(.2,1.4,.4,1) forwards; }
+@keyframes toastPop { 0% { opacity: 0; transform: translateX(-50%) scale(0.6); } 12% { opacity: 1; transform: translateX(-50%) scale(1.1); } 25% { transform: translateX(-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-14px) scale(1); } }
+.capital-text.tick { animation: capTick 0.25s ease-out; }
+@keyframes capTick { 0% { transform: scale(1); } 40% { transform: scale(1.18); color: #fff; } 100% { transform: scale(1); } }
+.capital-text.denied, .capital-pips.denied .pip { animation: capDeny var(--deny-dur, 0.4s) ease-out; }
+@keyframes capDeny { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); color: #ff5a5a; border-color: #ff5a5a; } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); color: #ff5a5a; } 80% { transform: translateX(3px); } }
 
 /* ---------- MÃO DE CARTAS ---------- */
 #hand { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; pointer-events: auto; }
 .card { width: 118px; height: 156px; border-radius: 14px; background: linear-gradient(160deg, #fffaf0, #f2e6c9); border: 3px solid #3a2f1c; box-shadow: 0 6px 0 #3a2f1c, 0 10px 20px rgba(0,0,0,0.35); position: relative; cursor: pointer; transition: transform 0.15s cubic-bezier(.2,1.4,.4,1), box-shadow 0.15s, filter 0.15s; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
-.card:hover { transform: translateY(-14px) rotate(-1deg); }
-.card.selected { transform: translateY(-22px) scale(1.06); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(255,210,63,0.5), 0 0 30px rgba(255,210,63,0.8), 0 6px 0 #3a2f1c; }
+.card:hover { transform: translateY(-14px) scale(1.04) rotate(-1deg); box-shadow: 0 0 0 3px rgba(255,255,255,0.35), 0 0 22px rgba(255,235,170,0.55), 0 8px 0 #3a2f1c, 0 14px 24px rgba(0,0,0,0.4); }
+.card:active { transform: translateY(-6px) scale(0.98); box-shadow: 0 2px 0 #3a2f1c, 0 6px 12px rgba(0,0,0,0.35); }
+.card.selected, .card.selected:hover { transform: translateY(-22px) scale(1.06); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(255,210,63,0.5), 0 0 30px rgba(255,210,63,0.8), 0 6px 0 #3a2f1c; }
 .card.disabled { filter: grayscale(0.8) brightness(0.6); cursor: not-allowed; }
-.card.disabled:hover { transform: none; }
+.card.disabled:hover, .card.disabled:active { transform: none; box-shadow: 0 6px 0 #3a2f1c, 0 10px 20px rgba(0,0,0,0.35); }
+.card.denied { animation: cardDeny var(--deny-dur, 0.4s) ease-out; }
+@keyframes cardDeny { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); border-color: #ff5a5a; box-shadow: 0 0 0 4px rgba(255,90,90,0.6), 0 6px 0 #3a2f1c; } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); border-color: #ff5a5a; box-shadow: 0 0 0 4px rgba(255,90,90,0.6), 0 6px 0 #3a2f1c; } 80% { transform: translateX(4px); } }
+/* barra "quanto falta" na carta bloqueada: --ready = (capital + progresso) / custo */
+.card .ready { position: absolute; left: 0; bottom: 0; height: 5px; width: calc(var(--ready, 0) * 100%); background: linear-gradient(90deg, #ffe680, #f5b400); display: none; transition: width 0.1s linear; z-index: 2; }
+.card.disabled .ready { display: block; }
 .card .cost { position: absolute; top: -4px; left: -4px; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe680, #e0a000); border: 3px solid #3a2f1c; font-family: 'Bangers', cursive; font-size: 22px; display: flex; align-items: center; justify-content: center; color: #1b1b2a; z-index: 2; }
 .card .icon { font-size: 52px; margin-top: 22px; line-height: 1; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.25)); }
 .card .name { font-family: 'Bangers', cursive; font-size: 17px; letter-spacing: 1px; color: #1b1b2a; margin-top: 8px; text-align: center; line-height: 1; padding: 0 4px; }

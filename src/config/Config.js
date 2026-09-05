@@ -69,6 +69,16 @@ export const Config = {
     matchEndSlowRecovery: 0.3,
   },
 
+  // ---------- UI / UX DAS CARTAS (ui/CardUI.js, ui/HUD.js) ----------
+  ui: {
+    toastDuration: 0.9,             // s que o aviso "CAPITAL INSUFICIENTE" fica na tela
+    denyFlashDuration: 0.4,         // s do flash vermelho na carta e no Capital
+    capitalTickPulse: true,         // pulso discreto no Capital a cada ponto ganho
+    showLaneNameOnHover: true,      // "LANE FRONTAL/CENTRAL/TRASEIRA" ao passar o mouse
+    laneHoverOpacity: 0.55,         // destaque dourado da lane sob o mouse (carta selecionada)
+    laneSelectOpacity: 0.18,        // destaque das outras lanes enquanto se escolhe
+  },
+
   // ---------- PERFORMANCE (debug/PerfStats.js) ----------
   perf: {
     showPerfOverlay: false,         // overlay leve (também ligado por ?debug=1)

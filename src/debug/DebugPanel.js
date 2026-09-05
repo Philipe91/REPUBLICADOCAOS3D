@@ -70,6 +70,15 @@ export class DebugPanel {
     t.add({ f: () => g.time.slowMotion(Config.time.slowMotionScale, Config.time.slowMotionDuration, Config.time.slowMotionRecovery) }, 'f').name('TEST SLOW MOTION');
     t.add({ f: () => { g.time.reset(); g.time.setGameSpeed(1); speedCtrl.updateDisplay(); } }, 'f').name('RESET TIME SCALE');
 
+    // UI / UX (ui/CardUI.js, ui/HUD.js)
+    const ui = gui.addFolder('UI / UX'); ui.close();
+    ui.add(Config.ui, 'toastDuration', 0.2, 3, 0.1);
+    ui.add(Config.ui, 'denyFlashDuration', 0.1, 1.5, 0.05);
+    ui.add(Config.ui, 'capitalTickPulse');
+    ui.add(Config.ui, 'showLaneNameOnHover');
+    ui.add(Config.ui, 'laneHoverOpacity', 0, 1, 0.05);
+    ui.add(Config.ui, 'laneSelectOpacity', 0, 1, 0.05);
+
     // PERFORMANCE (debug/PerfStats.js)
     const pf = gui.addFolder('PERFORMANCE'); pf.close();
     pf.add(Config.perf, 'showPerfOverlay');
