@@ -6,6 +6,7 @@ import { Game } from './core/Game.js';
 import { DebugPanel } from './debug/DebugPanel.js';
 import { assetManager } from './visual/AssetManager.js';
 import { Config } from './config/Config.js';
+import { bus } from './core/EventBus.js';
 
 const canvas = document.getElementById('game-canvas');
 const game = new Game(canvas);
@@ -18,6 +19,7 @@ assetManager.preload().then(n => { if (n) console.info(`[AssetManager] ${n} mode
 //   window.game.startMatch(); Config.debug.autoPlayer = true; Config.game.gameSpeed = 4
 window.game = game;
 window.Config = Config;
+window.bus = bus;   // testes automáticos escutam eventos por aqui
 window.debugPanel = panel;
 
 // Suporte a parâmetros de URL para testes: ?auto=1&speed=4&autostart=1

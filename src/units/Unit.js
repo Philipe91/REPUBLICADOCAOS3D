@@ -113,6 +113,7 @@ export class Unit {
   // ficam em effects/HitEffects.js, que escuta `unitDamaged`.
   takeDamage(amount, source = null, { knockback = 0, big = false, strength = null } = {}) {
     if (!this.alive) return;
+    if (this.state === STATE.SPECIAL && this.specialInvulnerable) return;   // ex.: Dino durante a transformação (Config)
     this.hp -= amount;
     this.lastAttacker = source;
     strength = strength || (big ? 'heavy' : this.strengthFor(amount));
@@ -246,7 +247,12 @@ export class Unit {
         break;
       case STATE.SPECIAL:
         this.specialTime -= dt;
-        if (this.specialTime <= 0) { this.setState(STATE.MOVING); this.state = STATE.MOVING; this.visual.playWalk(); }
+        if (this.specialTime <= 0) {
+          const kind = this.specialKind;
+          this.specialInvulnerable = false;
+          this.setState(STATE.MOVING); this.state = STATE.MOVING; this.visual.playWalk();
+          bus.emit('specialEnd', { unit: this, type: kind });
+        }
         break;
       case STATE.HIT:
         if (this.stateTime > 0.3) this.setState(STATE.MOVING);
@@ -361,13 +367,18 @@ export class Unit {
     bus.emit('unitHit', { unit: this, target, dmg });
   }
 
-  startSpecial(kind, duration) {
+  // Especial: estado SPECIAL por `duration` s. Emite specialStart/specialEnd (apresentação escuta).
+  // opts.invulnerable: ignora dano enquanto dura · opts.target: alvo do especial (payload do evento)
+  startSpecial(kind, duration, { invulnerable = false, target = null } = {}) {
     this.state = STATE.SPECIAL;
     this.stateTime = 0;
     this.specialTime = duration;
+    this.specialKind = kind;
+    this.specialInvulnerable = !!invulnerable;
     this.specialCooldown = this.stats.specialCooldown ?? 10;
     this.visual.playSpecial(kind, duration);
     this.game.audio.play('special');
+    bus.emit('specialStart', { unit: this, type: kind, duration, target });
   }
 
   dispose() { this.visual.dispose(); }

@@ -1,6 +1,6 @@
 # HANDOFF — continuar o projeto em outra máquina / nova conversa
 
-Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E6). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
+Atualizado em 04/09/2026 (PC de casa, após câmera lateral + E1..E7). Leia isto primeiro, depois `CLAUDE.md`, depois `docs/GUIA_DO_PROJETO.md`, depois `docs/PLANO-GAME-FEEL.md`.
 
 ---
 
@@ -64,7 +64,8 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 | E4 Identidade de time + spawn | ✅ concluída e commitada (05/09, PC de casa) |
 | E5 Impacto sincronizado, hit reaction, mortes | ✅ concluída e commitada (05/09, PC de casa) |
 | E6 Personalidade por personagem | ✅ concluída e commitada (05/09, PC de casa) |
-| E7..E12 | ⬜ não iniciadas |
+| E7 Especiais (Jurássico, Suspenso, Engajamento) | ✅ concluída e commitada (05/09, PC de casa) |
+| E8..E12 | ⬜ não iniciadas |
 
 **Câmera lateral (04/09, PC de casa):** a lógica do jogo NÃO mudou (eixo Z, lanes em x). A câmera fica no lado +X olhando para −X: base do jogador à esquerda, bot à direita, lanes em profundidade. `Config.camera` agora é `cameraSide/cameraDistance/cameraHeight/cameraSideOffset/cameraTarget*/cameraFov` (posição derivada em `CameraController.cameraPosition`). Decoração alta da Arena foi para o lado −X/além das bases. `visual.baseVisualScale` criada (1.0). Harness `test/*.mjs` portado para Windows (`executablePath` do playwright, `shell:true`, `VIEWPORT=`). Medido na RTX 3060: ~200 fps, 570–780 draw calls com 10–19 unidades.
 
@@ -87,7 +88,9 @@ Parâmetros de URL úteis: `?autostart=1`, `?auto=1` (bot joga pelo player), `?s
 
 **E6 (05/09, PC de casa) — personalidade.** `visual/procedural/Profiles.js` = SÓ DADOS por tipo (`tempo, bob, armSwing, rigidity, lean, gesture, gestureEvery, gestureDuration, jitter`); `profileFor(type)` aplica jitter por instância (militantes da horda não sincronizam). `Gestures.js`: gestos de idle sobrepostos (shout, phone, papers, pose, mic, salute, pen, stretch) + poses de RECESSO (saíram de Animations). `ProceduralAnimations.idle/walk/attack` recebem o perfil (tempo/bob/armSwing/rigidity/lean); o TIMING do ataque continua vindo da Unit. `ProceduralAnimator` agenda o gesto no idle (`gestureEvery` com variação) e o encerra; `CharacterFactory` mescla `spec.profile = profileFor(type)`. Novo personagem = 1 linha em Profiles (+ 1 gesto se quiser). Teste: `test/e6.mjs`; capturas em `test/shots/e6/`.
 
-**Próximo passo concreto:** E7 (MODO JURÁSSICO, SUSPENSO, Engajamento com câmera/som/eventos specialStart/End). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
+**E7 (05/09, PC de casa) — especiais.** `Unit.startSpecial(kind, duration, {invulnerable, target})` emite `specialStart`; o fim do SPECIAL emite `specialEnd`; `takeDamage` ignora dano se `specialInvulnerable`. `effects/SpecialEffects.js` (novo) escuta esses eventos + `engagementGain`: Jurássico = burst/anel/texto/meme + shake + `camera.impulseZoom(specialCameraZoom)` (decai por `impulseDecay` ≈ 400 ms) + slow-mo curtíssimo (`time.specialSlow*`) + som `roar`; Suspenso = "SUSPENSO?" + som subindo + anel roxo no alvo + meme; Engajamento = texto/corações/VIRALIZOU. UnitBehaviors ficou só com lógica (dino: `jurassicDuration` 1.1 s e `jurassicInvulnerable` 1/0 em Config.units.dino — decisão: INVULNERÁVEL durante a transformação; influencer emite `engagementGain`; careca passa `target`). `window.bus` exposto para testes. Testes: `test/e7.mjs`; sequência em `test/shots/e7/`.
+
+**Próximo passo concreto:** E8 (CANETADA completa: aviso → sombra → caneta → impacto → onda → papéis → knockback → texto → shake → hit-stop, ≤ 1,5 s, dano no powerImpact). Arquivos da E1: `src/config/Config.js`, `src/core/Game.js`, `src/core/TimeController.js` (novo), `src/debug/PerfStats.js` (novo), `src/debug/DebugPanel.js`, `src/units/UnitManager.js`, `src/core/EventBus.js`. Critério de pronto está no plano.
 
 ## 7. Regras que valem para todas as etapas (resumo do plano e do CLAUDE.md)
 

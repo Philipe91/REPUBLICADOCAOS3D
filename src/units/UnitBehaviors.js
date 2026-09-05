@@ -73,9 +73,7 @@ export const Behaviors = {
         const st = u.stats;
         u.data.stacks = Math.min(st.engajamentoMax, u.data.stacks + 1);
         u.data.stackTime = st.engajamentoDuration;
-        u.game.effects.text.show('ENGAJAMENTO +' + u.data.stacks, u.hitPoint.add(new THREE.Vector3(0, 0.8, 0)), { color: '#ff7ab8', size: 0.9, life: 1 });
-        u.game.effects.particles.burst(u.hitPoint, 8, { color: 0xff4d8d, speed: 3, size: 0.16, gravity: -1, life: 1 });
-        if (u.data.stacks >= st.engajamentoMax) u.game.effects.text.meme('VIRALIZOU!', { color: '#ff7ab8' });
+        bus.emit('engagementGain', { unit: u, level: u.data.stacks, max: st.engajamentoMax });   // SpecialEffects mostra texto/corações/meme
         if (u.state === STATE.MOVING) u.visual.playSpecial('engajamento', 0.5);
       });
     },
@@ -139,10 +137,8 @@ export const Behaviors = {
     trySpecial(u) {
       const t = u.target;
       if (!t || t.isBase || !t.alive || t.stunned > 0) return false;
-      u.startSpecial('suspenso', 0.9);
+      u.startSpecial('suspenso', 0.9, { target: t });   // SpecialEffects: antecipação + anel no alvo + meme
       t.stun(u.stats.stunDuration);
-      u.game.effects.particles.ring(t.pos, { color: 0x9b7bff, radius: 2, duration: 0.5 });
-      u.game.effects.text.meme('SUSPENSO!', { color: '#c9b6ff' });
       return true;
     },
   },
@@ -159,14 +155,9 @@ export const Behaviors = {
       u.passiveSpeedMult = st.jurassicSpeedMult;
       u.radius *= 1.2;
       u.visualScale = (st.scale ?? 1) * st.jurassicScale;
-      u.startSpecial('jurassico', 1.1);
+      // transformação: SPECIAL por jurassicDuration, invulnerável se Config disser (SpecialEffects faz o resto)
+      u.startSpecial('jurassico', st.jurassicDuration ?? 1.1, { invulnerable: (st.jurassicInvulnerable ?? 1) >= 1 });
       u.specialCooldown = 0;
-      u.game.effects.particles.burst(u.hitPoint, 30, { color: 0x3f8f3a, speed: 6, size: 0.25, gravity: 8 });
-      u.game.effects.particles.ring(u.pos, { color: 0x3f8f3a, radius: 4, duration: 0.7 });
-      u.game.effects.text.show('MODO JURÁSSICO!', u.hitPoint.add(new THREE.Vector3(0, 1.4, 0)), { color: '#9fd67a', size: 1.4, life: 1.5, font: 'bold 36px Arial' });
-      u.game.effects.text.meme('MODO JURÁSSICO!', { color: '#9fd67a', force: true });
-      u.game.camera.addShake(0.6);
-      u.game.audio.play('special');
     },
   },
 };

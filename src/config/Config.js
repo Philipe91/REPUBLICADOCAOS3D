@@ -39,6 +39,8 @@ export const Config = {
     cameraTargetY: 1.7,
     cameraTargetZ: 0,
     cameraShakeStrength: 1.0,
+    specialCameraZoom: 5,   // impulso de zoom (graus de fov) nos especiais; sempre reversível
+    impulseDecay: 7,        // velocidade de retorno dos impulsos de câmera (≈ 400 ms)
   },
 
   lanes: {
@@ -69,6 +71,9 @@ export const Config = {
     slowMotionScale: 0.35,          // câmera lenta padrão: escala…
     slowMotionDuration: 0.25,       // …segurada por (s)…
     slowMotionRecovery: 0.15,       // …e retorno linear a 1 em (s)
+    specialSlowScale: 0.45,         // slow-motion curtíssimo do MODO JURÁSSICO
+    specialSlowDuration: 0.2,
+    specialSlowRecovery: 0.15,
     matchEndSlowScale: 0.25,        // slow-motion da destruição da base
     matchEndSlowDuration: 1.0,
     matchEndSlowRecovery: 0.3,
@@ -131,7 +136,7 @@ export const Config = {
     barbudo:   { hp: 650,  damage: 32, moveSpeed: 1.5, attackSpeed: 0.8, attackRange: 1.6, cost: 5, spawnCount: 1, knockback: 0.6, scale: 1.15, auraRadius: 5, auraBonus: 0.2, specialCooldown: 10, discursoRadius: 6, discursoBonus: 0.3, discursoDuration: 5 },
     capitao:   { hp: 400,  damage: 22, moveSpeed: 2.2, attackSpeed: 2.2, attackRange: 1.5, cost: 5, spawnCount: 1, knockback: 0.4, scale: 1.05, cercadinhoRadius: 4, cercadinhoBonus: 0.08, cercadinhoMax: 5, specialCooldown: 12 },
     careca:    { hp: 850,  damage: 95, moveSpeed: 1.3, attackSpeed: 0.5, attackRange: 1.9, cost: 6, spawnCount: 1, knockback: 1.6, scale: 1.2, specialCooldown: 9, stunDuration: 2.5 },
-    dino:      { hp: 1300, damage: 45, moveSpeed: 1.0, attackSpeed: 0.7, attackRange: 1.7, cost: 7, spawnCount: 1, knockback: 1.0, scale: 1.3, jurassicDamageMult: 1.8, jurassicKnockbackMult: 2.2, jurassicSpeedMult: 0.7, jurassicScale: 1.35 },
+    dino:      { hp: 1300, damage: 45, moveSpeed: 1.0, attackSpeed: 0.7, attackRange: 1.7, cost: 7, spawnCount: 1, knockback: 1.0, scale: 1.3, jurassicDamageMult: 1.8, jurassicKnockbackMult: 2.2, jurassicSpeedMult: 0.7, jurassicScale: 1.35, jurassicDuration: 1.1, jurassicInvulnerable: 1 },   // invulnerável durante a transformação (1 = sim)
     moto:      { hp: 1,    damage: 70, moveSpeed: 16,  attackSpeed: 0,   attackRange: 1.2, cost: 0, spawnCount: 3, knockback: 2.5, scale: 1.0 },
   },
 

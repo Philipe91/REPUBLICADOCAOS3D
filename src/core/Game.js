@@ -15,6 +15,7 @@ import { ProjectileManager } from '../effects/ProjectileManager.js';
 import { HealthBarManager } from '../effects/HealthBarManager.js';
 import { SpawnEffects } from '../effects/SpawnEffects.js';
 import { HitEffects } from '../effects/HitEffects.js';
+import { SpecialEffects } from '../effects/SpecialEffects.js';
 import { AudioManager } from '../audio/AudioManager.js';
 import { UnitManager } from '../units/UnitManager.js';
 import { Powers } from '../cards/Powers.js';
@@ -65,6 +66,7 @@ export class Game {
     this.debugDraw = new DebugDraw(this);
     this.spawnFx = new SpawnEffects(this);   // apresentação: só escuta unitSpawned
     this.hitFx = new HitEffects(this);       // apresentação: só escuta unitDamaged/unitDied
+    this.specialFx = new SpecialEffects(this); // apresentação: só escuta specialStart/End, engagementGain
     this.time = new TimeController();     // única fonte de escala de tempo (hit-stop, slow-mo, gameSpeed)
     this.perf = new PerfStats(this);
     this.stress = new StressTest(this);

@@ -6,8 +6,10 @@
 //   unitDamaged carrega `strength` (light|medium|heavy|special) · unitDied {unit, killer, strength}
 //   attackImpact {attacker, target|null, strength, ranged} — frame de impacto do golpe (E5)
 //   baseHit {base, amount, source} · baseStage {base, stage} · baseDestroyed {base}
+//   specialStart {unit, type, duration, target|null} · specialEnd {unit, type} (E7)
+//   engagementGain {unit, level, max} (E7)
 // Reservados para a fase Game Feel (nomes fixos, ainda não emitidos):
-//   unitKnockback {unit, force} · specialStart/specialEnd {unit, type} · powerStart/powerImpact {power, lane, team, position}
+//   unitKnockback {unit, force} · powerStart/powerImpact {power, lane, team, position}
 //   baseCritical {team} · tretaFinal · chaosSpike {level} · capitalFull {team}
 //   engagementGain {unit, level} · stressTest {count}
 // Regra: sistemas de jogo EMITEM; câmera/partículas/áudio/memes/tempo só ESCUTAM.

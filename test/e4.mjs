@@ -28,7 +28,7 @@ const r = await ev(() => {
   const bandColor = (t) => { const u = game.units.units.find(x => x.team === t && x.type === 'capitao'); return u.visual.rig.parts.teamBand.material.color.getHex(); };
   return { alive, bands, noBandMil, pc: bandColor('player'), bc: bandColor('bot'), texts: game.effects.text.items.length, particles: game.effects.particles.count - p0 };
 });
-await page.waitForTimeout(120);
+await page.waitForTimeout(600);   // ≥ 1 frame no headless (~170 ms) para o HealthBarManager atualizar
 const hb = await ev(() => ({ ring: game.effects.healthBars.ring.count, alive: game.units.units.filter(u => u.alive).length, bgColor: !!game.effects.healthBars.bg.instanceColor }));
 check('anel de time para toda unidade viva (1 InstancedMesh)', hb.ring === hb.alive && hb.ring === r.alive, JSON.stringify(hb));
 check('braçadeira de time em todos menos militante, com a cor do time', r.bands && r.noBandMil && r.pc === 0x2bb3c0 && r.bc === 0xe8772e, JSON.stringify({ pc: r.pc.toString(16), bc: r.bc.toString(16) }));

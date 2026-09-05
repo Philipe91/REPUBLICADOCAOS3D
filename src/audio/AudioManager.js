@@ -128,6 +128,14 @@ export class AudioManager {
       case 'stun':
         this._tone({ freq: 1500, freq2: 300, type: 'square', dur: 0.35, gain: 0.2 });
         break;
+      case 'roar':
+        this._tone({ freq: 60, freq2: 25, type: 'sawtooth', dur: 0.6, gain: 0.5 });
+        this._noise({ dur: 0.5, gain: 0.3, lp: 300 });
+        this._tone({ freq: 110, freq2: 40, type: 'square', dur: 0.4, gain: 0.2, delay: 0.1 });
+        break;
+      case 'suspensoWindup':
+        this._tone({ freq: 300, freq2: 1300, type: 'sine', dur: 0.5, gain: 0.2 });
+        break;
       case 'moto':
         for (let i = 0; i < 6; i++) this._tone({ freq: 80 + i * 25, freq2: 60 + i * 40, type: 'sawtooth', dur: 0.15, gain: 0.2, delay: i * 0.1 });
         break;

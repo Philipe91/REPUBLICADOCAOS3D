@@ -34,6 +34,11 @@ export class CameraController {
     this.shake = Math.min(2.5, this.shake + amount * Config.camera.cameraShakeStrength);
   }
 
+  // aproximação curta (graus de fov) que decai sozinha (Config.camera.impulseDecay); nunca esconde as outras lanes
+  impulseZoom(amount) {
+    this.zoomPunch = Math.max(this.zoomPunch, Math.min(20, amount));
+  }
+
   update(dt) {
     const c = Config.camera;
     this.shakeTime += dt * 40;
@@ -56,6 +61,6 @@ export class CameraController {
     this._target.x += this._offset.x;
     this._target.z += this._offset.z;
     this.camera.lookAt(this._target);
-    this.zoomPunch = THREE.MathUtils.damp(this.zoomPunch, 0, 2, dt);
+    this.zoomPunch = THREE.MathUtils.damp(this.zoomPunch, 0, Config.camera.impulseDecay, dt);
   }
 }
