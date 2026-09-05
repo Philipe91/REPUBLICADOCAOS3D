@@ -53,7 +53,7 @@ export class GLBCharacterVisual extends CharacterVisual {
     this._impact = onImpact ? { t: windup, cb: onImpact } : null;   // futuro: marcador de clip → mesmo callback
   }
   playHit() { this._play('hit', { loop: false }); }
-  playDeath() { this._play('death', { loop: false }); }
+  playDeath(strength = 'medium') { this._play(`death_${strength}`) || this._play('death', { loop: false }); }   // GLB futuro: clip por força, senão o genérico
   playSpecial(kind) { this._play(`special_${kind}`) || this._play('special', { loop: false }); }
   playVictory() { this._play('victory'); }
   playStun(on) { on ? this._play('stun') : this.playIdle(); }

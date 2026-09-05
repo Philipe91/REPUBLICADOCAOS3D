@@ -8,9 +8,12 @@ import { G, mat, basicMat } from '../core/Assets.js';
 
 const _dir = new THREE.Vector3();
 
+const KIND_COLOR = { zap: 0x5ce27a, like: 0xff4d8d, generic: 0xffee66 };
+
 export class ProjectileManager {
-  constructor(scene) {
+  constructor(scene, particles = null) {
     this.scene = scene;
+    this.particles = particles;   // opcional: faíscas no disparo e no impacto
     this.active = [];
     this.free = [];
   }
@@ -50,6 +53,7 @@ export class ProjectileManager {
     for (const k in p.parts) p.parts[k].visible = k === kind;
     p.group.visible = true;
     this.active.push(p);
+    if (this.particles) this.particles.burst(from, 4, { color: KIND_COLOR[kind] || 0xffffff, speed: 2, size: 0.1, gravity: 4, life: 0.35 });
     return p;
   }
 
@@ -63,6 +67,10 @@ export class ProjectileManager {
       const dist = _dir.length();
       const step = p.speed * dt;
       if (dist <= step + 0.15) {
+        if (this.particles) {
+          this.particles.burst(tp, 6, { color: KIND_COLOR[p.kind] || 0xffffff, speed: 3, size: 0.13, gravity: 8, life: 0.4 });
+          this.particles.ring(tp, { color: KIND_COLOR[p.kind] || 0xffffff, radius: 0.7, duration: 0.22, y: tp.y });
+        }
         if (p.onHit) p.onHit(tgt, p);
         this._release(i);
         continue;

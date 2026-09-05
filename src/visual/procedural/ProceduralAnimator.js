@@ -10,6 +10,7 @@
 // (GLB futuro) pode simplesmente ignorar e a Unit segue por timeout.
 // ============================================================
 import * as A from './ProceduralAnimations.js';
+import { death as deathAnim, pickDeath } from './Deaths.js';
 
 const HIT_TIME = 0.3;
 
@@ -47,6 +48,7 @@ export class ProceduralAnimator {
     }
     if (name === 'walk') this.walkFactor = params.factor ?? 1;
     if (name === 'special') { this.specialKind = params.kind ?? 'default'; this.specialDuration = params.duration ?? 1; }
+    if (name === 'death') this.deathVariant = params.variant ?? pickDeath(params.strength);
   }
 
   hit(strength = 1) { this.hitT = HIT_TIME; this.hitStrength = strength; }
@@ -78,8 +80,8 @@ export class ProceduralAnimator {
         if (this.recessoVariant === null) this.recessoVariant = Math.floor(Math.random() * 3);
         A.recesso(rig, T, this.recessoVariant); break;
       case 'death':
-        if (this.deathVariant === null) this.deathVariant = Math.random() < 0.5 ? 0 : 1;
-        A.death(rig, t, this.deathVariant); break;
+        if (this.deathVariant === null) this.deathVariant = pickDeath('medium');
+        deathAnim(rig, t, this.deathVariant); break;
     }
     // reação de dano sobreposta
     if (this.hitT > 0 && this.anim !== 'death') {

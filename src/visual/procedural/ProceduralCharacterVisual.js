@@ -36,7 +36,7 @@ export class ProceduralCharacterVisual extends CharacterVisual {
   playWalk(factor = 1) { this.animator.setAnim('walk', { factor }); }
   playAttack(windup, duration, { onImpact = null } = {}) { this.animator.setAnim('attack', { windup, duration, onImpact }); }
   playHit(strength = 1) { this.animator.hit(strength); }
-  playDeath() { this.animator.setAnim('death'); }
+  playDeath(strength = 'medium') { this.animator.setAnim('death', { strength }); }
   playSpecial(kind, duration) { this.animator.setAnim('special', { kind, duration }); }
   playVictory() { this.animator.setAnim('victory'); }
   playStun(on) { this.animator.setAnim(on ? 'stun' : 'idle'); }

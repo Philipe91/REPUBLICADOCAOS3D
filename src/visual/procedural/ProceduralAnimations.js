@@ -143,28 +143,7 @@ export function recesso(rig, T, variant = 0) {
   }
 }
 
-// variantes: 0 tomba de costas com pulinho · 1 gira e cai; depois de 1 s afunda no chão
-export function death(rig, t, variant = 0) {
-  const P = rig.parts;
-  const p = Math.min(1, t / 0.9);
-  const e = 1 - Math.pow(1 - p, 3);
-  if (variant === 0) {
-    rig.model.rotation.x = -Math.PI / 2 * e;
-    rig.model.position.y = Math.sin(p * Math.PI) * 0.6;
-    rig.model.position.z = -0.4 * e;
-    P.armL.rotation.x = -2.5 * e; P.armR.rotation.x = -2.5 * e;
-    P.legL.rotation.x = -0.4 * e; P.legR.rotation.x = 0.6 * e;
-  } else {
-    rig.model.rotation.y = Math.PI * 4 * e;
-    rig.model.position.y = Math.sin(p * Math.PI) * 1.2;
-    rig.model.rotation.z = Math.PI / 2 * e;
-    P.armL.rotation.z = -2.0 * e; P.armR.rotation.z = 2.0 * e;
-  }
-  if (t > 1.0) {
-    const s = Math.max(0, 1 - (t - 1.0) / 0.5);
-    rig.model.scale.setScalar(s);
-  }
-}
+// mortes: ver Deaths.js (5 variações escolhidas pela força do golpe)
 
 // reação de dano SOBREPOSTA à animação corrente (p = 1 → 0 ao longo de 0.3 s)
 export function hitOverlay(rig, p, strength = 1) {

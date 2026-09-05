@@ -103,33 +103,31 @@ export class Unit {
   }
 
   // ---------- dano ----------
-  takeDamage(amount, source = null, { knockback = 0, big = false, color = 0xffffff } = {}) {
+  // força do golpe (enum light | medium | heavy | special) a partir do dano — Config.combat
+  strengthFor(amount) {
+    const C = Config.combat;
+    return amount >= C.bigHitThreshold ? 'heavy' : amount >= C.mediumHitThreshold ? 'medium' : 'light';
+  }
+
+  // Só LÓGICA: HP, knockback por força, eventos. Partículas/flash/shake/hit-stop/som
+  // ficam em effects/HitEffects.js, que escuta `unitDamaged`.
+  takeDamage(amount, source = null, { knockback = 0, big = false, strength = null } = {}) {
     if (!this.alive) return;
     this.hp -= amount;
     this.lastAttacker = source;
-    const fx = this.game.effects;
-    const hp = this.hitPoint;
-    const isBig = big || amount >= Config.combat.bigHitThreshold;
-    fx.text.damage(amount, hp, isBig);
-    fx.particles.burst(hp, isBig ? 14 : 6, { color: isBig ? 0xffd23f : 0xffffff, speed: isBig ? 5 : 3, size: isBig ? 0.22 : 0.14, gravity: 9, life: 0.5 });
-    this.visual.flash(0xff6644, 0.08);
-    this.visual.playHit(isBig ? 1.3 : 0.7);
+    strength = strength || (big ? 'heavy' : this.strengthFor(amount));
+    const kbMult = strength === 'light' ? 0.6 : (strength === 'heavy' || strength === 'special') ? 1.2 : 1;   // reação por força
     if (source && source.dir !== undefined) {
       const dirZ = Math.sign(this.pos.z - source.pos.z) || -source.dir;
-      const k = (knockback || (source.knockback ?? 0.3)) * (this.isSmall ? 1.4 : 1);
+      const k = (knockback || (source.knockback ?? 0.3)) * (this.isSmall ? 1.4 : 1) * kbMult;
       this.kb.z += dirZ * k * 6;
       this.kb.x += (Math.random() - 0.5) * k * 2;
     } else if (knockback) {
-      this.kb.z += -this.dir * knockback * 6;
+      this.kb.z += -this.dir * knockback * 6 * kbMult;
     }
-    if (isBig) {
-      this.game.camera.addShake(0.35);
-      this.game.hitStop(Config.combat.hitStopDuration);
-      this.game.audio.play('bigHit');
-    } else this.game.audio.play('hit');
     if (this.behavior?.onDamaged) this.behavior.onDamaged(this, amount, source);
-    bus.emit('unitDamaged', { unit: this, amount, source });
-    if (this.hp <= 0) this.die(source);
+    bus.emit('unitDamaged', { unit: this, amount, source, strength });
+    if (this.hp <= 0) this.die(source, strength);
   }
 
   heal(amount) { this.hp = Math.min(this.maxHp, this.hp + amount); }
@@ -144,19 +142,24 @@ export class Unit {
     this.game.audio.play('stun');
   }
 
-  die(killer = null) {
+  die(killer = null, strength = 'medium') {
     if (!this.alive) return;
     this.alive = false;
     this.state = STATE.DEAD;
     this.stateTime = 0;
     this.deathTimer = 1.6;
     this.target = null;
-    this.visual.playDeath();
+    // empurrão de morte para longe de quem matou: pequenos voam mais, golpe pesado voa mais
+    if (killer && killer.dir !== undefined) {
+      const C = Config.combat;
+      const heavy = strength === 'heavy' || strength === 'special';
+      const f = C.deathKnockbackMultiplier * (this.isSmall ? C.smallUnitDeathFlyMult : 1) * (heavy ? 1.5 : 1);
+      const dirZ = Math.sign(this.pos.z - killer.pos.z) || -killer.dir;
+      this.kb.z += dirZ * 2.5 * f;
+    }
+    this.visual.playDeath(strength);
     if (this.behavior?.onDeath) this.behavior.onDeath(this);
-    const fx = this.game.effects;
-    fx.particles.burst(this.hitPoint, 10, { color: 0xffffff, speed: 4, size: 0.18, gravity: 10 });
-    fx.particles.burst(this.hitPoint, 4, { color: 0xfdfdf5, speed: 2, size: 0.25, gravity: 1.2, paper: true, life: 2 });
-    bus.emit('unitDied', { unit: this, killer });
+    bus.emit('unitDied', { unit: this, killer, strength });
   }
 
   // ---------- alvo ----------
@@ -300,16 +303,29 @@ export class Unit {
     this.attackHitDone = false;
     this.attackInterval = 1 / Math.max(0.05, this.attackSpeed);
     this.attackWindup = Math.min(0.32, this.attackInterval * 0.4);
-    this.visual.playAttack(this.attackWindup, this.attackInterval);
+    // o VISUAL avisa o frame de impacto (onImpact); se não avisar, _attackUpdate aplica por timeout
+    this.visual.playAttack(this.attackWindup, this.attackInterval, { onImpact: () => this._impact() });
     this.game.audio.play('attack');
+  }
+
+  // Frame de impacto: chamado pelo visual (onImpact) OU pelo fallback por timeout.
+  // Aplica dano UMA vez por ataque; revalida o alvo (morreu/saiu do alcance → golpe no vazio).
+  _impact() {
+    if (!this.alive || this.state !== STATE.ATTACKING || this.attackHitDone) return;
+    if (this.stunned > 0 || this.frozen > 0) return;     // preso: o timer da Unit também está parado
+    this.attackHitDone = true;
+    const dmg = this.damage;
+    const strength = this.strengthFor(dmg);
+    const target = this.target;
+    const valid = this.targetValid(target) && this.distanceTo(target) <= this.attackRange + 0.6;
+    bus.emit('attackImpact', { attacker: this, target: valid ? target : null, strength, ranged: this.isRanged });
+    if (valid) this._hit(target, dmg, strength);
   }
 
   _attackUpdate(dt) {
     this.attackTimer += dt;
-    if (!this.attackHitDone && this.attackTimer >= this.attackWindup) {
-      this.attackHitDone = true;
-      if (this.targetValid(this.target) && this.distanceTo(this.target) <= this.attackRange + 0.6) this._hit(this.target);
-    }
+    // fallback: visual sem callback (ex.: GLB sem marcador) → dano por timeout, nunca duplicado
+    if (!this.attackHitDone && this.attackTimer >= this.attackWindup + Config.combat.impactTimeout) this._impact();
     if (this.attackTimer >= this.attackInterval) {
       // tenta especial antes do próximo golpe
       if (this.behavior?.trySpecial && this.specialCooldown <= 0 && this.behavior.trySpecial(this)) return;
@@ -318,29 +334,28 @@ export class Unit {
     }
   }
 
-  _hit(target) {
-    const dmg = this.damage;
+  _hit(target, dmg = this.damage, strength = this.strengthFor(dmg)) {
     if (this.isRanged) {
       const from = this.hitPoint;
       from.z += this.dir * 0.3;
       this.game.effects.projectiles.spawn({
         from, target, kind: this.projectileKind, speed: this.stats.projectileSpeed ?? 12,
-        onHit: (t) => this._applyDamage(t, dmg),
+        onHit: (t) => this._applyDamage(t, dmg, strength),
       });
       if (this.projectileKind === 'zap') this.game.audio.play('zap');
       if (this.behavior?.onShoot) this.behavior.onShoot(this, target);
     } else {
-      this._applyDamage(target, dmg);
+      this._applyDamage(target, dmg, strength);
     }
   }
 
-  _applyDamage(target, dmg) {
+  _applyDamage(target, dmg, strength = this.strengthFor(dmg)) {
     if (!this.targetValid(target)) return;
     if (target.isBase) {
       target.takeDamage(dmg * Config.base_damage.unitToBaseMultiplier * this.game.baseDamageRamp, this);
       this.game.audio.play('baseHit');
     } else {
-      target.takeDamage(dmg, this, { knockback: this.knockback });
+      target.takeDamage(dmg, this, { knockback: this.knockback, strength });
     }
     if (this.behavior?.onHit) this.behavior.onHit(this, target, dmg);
     bus.emit('unitHit', { unit: this, target, dmg });

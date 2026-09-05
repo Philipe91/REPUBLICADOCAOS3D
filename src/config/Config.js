@@ -53,8 +53,13 @@ export const Config = {
     globalHPMultiplier: 1.0,
     globalMoveSpeedMultiplier: 1.0,
     knockbackStrength: 1.0,
-    hitStopDuration: 0.045, // pausa em golpes grandes (s). Fica em `combat` porque Unit.js/Powers.js leem daqui; o lil-gui mostra na seção TIME
-    bigHitThreshold: 60,    // dano a partir do qual há hit-stop + shake
+    hitStopDuration: 0.045, // pausa em golpes grandes (s). Fica em `combat` porque Powers.js/HitEffects leem daqui; o lil-gui mostra na seção TIME
+    bigHitThreshold: 60,    // dano a partir do qual o golpe é `heavy` (hit-stop + shake)
+    mediumHitThreshold: 25, // dano a partir do qual o golpe é `medium`; abaixo é `light`
+    impactTimeout: 0.15,    // s após o windup: se o visual não chamar onImpact, a Unit aplica o dano mesmo assim
+    hitFlashDuration: 0.08, // flash da unidade atingida (medium); light = metade, heavy = 1,5×
+    deathKnockbackMultiplier: 1.0, // empurrão extra na morte (para longe de quem matou)
+    smallUnitDeathFlyMult: 1.6,    // pequenos (militante) voam mais ao morrer
   },
 
   // ---------- TEMPO / GAME FEEL (core/TimeController.js) ----------

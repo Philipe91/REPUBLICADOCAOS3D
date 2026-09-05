@@ -15,8 +15,8 @@ export class CharacterVisual {
   playIdle() {}
   playWalk(speedFactor = 1) {}
   playAttack(windup = 0.25, duration = 0.6, { onImpact = null } = {}) {}
-  playHit(strength = 1) {}
-  playDeath() {}
+  playHit(strength = 1) {}          // intensidade numérica do recuo (HitEffects decide por força)
+  playDeath(strength = 'medium') {} // força do golpe fatal: light | medium | heavy | special → variação de morte
   playSpecial(kind = 'default', duration = 1) {}
   playVictory() {}
   playStun(on) {}
