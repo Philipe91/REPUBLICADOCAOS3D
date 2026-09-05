@@ -17,6 +17,7 @@ import { SpawnEffects } from '../effects/SpawnEffects.js';
 import { HitEffects } from '../effects/HitEffects.js';
 import { SpecialEffects } from '../effects/SpecialEffects.js';
 import { PowerEffects } from '../effects/PowerEffects.js';
+import { MatchEffects } from '../effects/MatchEffects.js';
 import { AudioManager } from '../audio/AudioManager.js';
 import { UnitManager } from '../units/UnitManager.js';
 import { Powers } from '../cards/Powers.js';
@@ -36,9 +37,10 @@ export class Game {
   constructor(canvas) {
     this.canvas = canvas;
     this.renderer = createRenderer(canvas);
-    const { scene, sun } = createScene();
+    const { scene, sun, hemi } = createScene();
     this.scene = scene;
     this.sun = sun;
+    this.hemi = hemi;
     this.cameraObj = createCamera();
     this.camera = new CameraController(this.cameraObj);
 
@@ -69,6 +71,7 @@ export class Game {
     this.hitFx = new HitEffects(this);       // apresentação: só escuta unitDamaged/unitDied
     this.specialFx = new SpecialEffects(this); // apresentação: só escuta specialStart/End, engagementGain
     this.powerFx = new PowerEffects(this);     // apresentação: powerStart/powerImpact (marcador, sombra, onda…)
+    this.matchFx = new MatchEffects(this);     // apresentação: baseCritical, tretaFinal, matchEnd
     this.time = new TimeController();     // única fonte de escala de tempo (hit-stop, slow-mo, gameSpeed)
     this.perf = new PerfStats(this);
     this.stress = new StressTest(this);
@@ -90,7 +93,6 @@ export class Game {
     bus.on('baseDestroyed', ({ base }) => this.onBaseDestroyed(base));
     bus.on('unitDied', ({ unit, killer }) => { if (this.playing) this.kills[unit.team === 'player' ? 'bot' : 'player']++; });
     bus.on('unitHit', ({ dmg }) => { if (dmg > 80 && Math.random() < 0.15) this.effects.text.meme('TRETA!'); });
-    bus.on('baseStage', ({ base, stage }) => { if (stage === 3) this.effects.text.meme(base.team === 'player' ? 'A CASA TÁ CAINDO!' : 'ELES TÃO CAINDO!', { color: '#ff5a5a', force: true }); });
 
     window.addEventListener('resize', () => this.onResize());
     this.onResize();
@@ -147,6 +149,7 @@ export class Game {
     this.effects.projectiles.clear();
     this.time.reset();
     this.camera.shake = 0;
+    bus.emit('matchCleared');
   }
 
   endToMenu() {
@@ -164,18 +167,15 @@ export class Game {
     this.finish(victory);
   }
 
+  // Fim da partida: só estado + vencedores comemoram; slow-mo/câmera/meme/som ficam em MatchEffects (matchEnd)
   finish(victory) {
     this.ended = true;
     this.result = victory ? 'victory' : 'defeat';
     this.endTimer = 2.6;
-    this.time.slowMotion(Config.time.matchEndSlowScale, Config.time.matchEndSlowDuration, Config.time.matchEndSlowRecovery);
-    this.camera.addShake(1.4);
-    this.camera.zoomPunch = 6;
+    this.time.matchMultiplier = 1;
     this.units.celebrate(victory ? 'player' : 'bot');
-    this.effects.text.meme(victory ? 'CRISE INSTITUCIONAL!' : 'A CASA CAIU!', { color: victory ? '#ffd23f' : '#ff5a5a', force: true, duration: 2.5 });
-    this.audio.play('baseDestroyed');
-    setTimeout(() => this.audio.play(victory ? 'victory' : 'defeat'), 700);
-    bus.emit('matchEnd', { victory });
+    const destroyed = this.bases.player.destroyed ? this.bases.player : this.bases.bot.destroyed ? this.bases.bot : null;
+    bus.emit('matchEnd', { victory, base: destroyed });
   }
 
   showEndScreen() {
@@ -236,6 +236,7 @@ export class Game {
     this.effects.particles.update(visualDt);
     this.effects.text.update(raw);
     this.effects.healthBars.update(this.units.units);
+    this.matchFx.update(raw);
     this.camera.update(raw);
     this.debugDraw.update();
     this.renderer.render(this.scene, this.cameraObj);
@@ -247,9 +248,8 @@ export class Game {
     const BD = Config.base_damage;
     if (!this.tretaFinal && this.matchTime >= Config.game.matchDuration) {
       this.tretaFinal = true;
-      this.effects.text.meme('TRETA FINAL!', { color: '#ff5a5a', force: true, duration: 2 });
-      this.camera.addShake(0.6);
-      this.audio.play('special');
+      this.time.matchMultiplier = Config.game.tretaFinalSpeedMultiplier;   // jogo acelera na Treta
+      bus.emit('tretaFinal', { overtimeMax: BD.tretaFinalMaxOvertime });    // MatchEffects: vinheta, luzes, alerta, som
     }
     if (this.tretaFinal) {
       this.overtime += dt;

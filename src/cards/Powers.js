@@ -203,7 +203,7 @@ export class Powers {
       // chega na base inimiga
       const base = g.enemyBase(m.team);
       if ((m.mesh.position.z - base.front) * m.dir > -0.5) {
-        if (!base.destroyed) { base.takeDamage(m.damage * 0.6 * g.baseDamageRamp, null); }
+        if (!base.destroyed) { base.takeDamage(m.damage * 0.6 * g.baseDamageRamp, null, { strength: 'heavy' }); }
         bus.emit('powerImpact', { power: 'motociata', team: m.team, lane: m.lane, position: m.mesh.position.clone(), radius: 1.5, hits: 0, base: true });
         m.alive = false; m.mesh.visible = false; this.motoPool.push(m); this.motos.splice(i, 1);
       }
@@ -226,7 +226,7 @@ export class Powers {
       }
     }
     const base = g.enemyBase(p.team);
-    if (!base.destroyed && Math.abs(base.front - p.z) <= p.radius) base.takeDamage(dmg * 0.5, null);
+    if (!base.destroyed && Math.abs(base.front - p.z) <= p.radius) base.takeDamage(dmg * 0.5, null, { strength: 'special' });
     bus.emit('powerImpact', { power: 'canetada', team: p.team, lane: p.lane, position: new THREE.Vector3(p.x, 0, p.z), radius: p.radius, hits });
   }
 

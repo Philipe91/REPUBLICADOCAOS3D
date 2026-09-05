@@ -119,18 +119,21 @@ export class Base {
     this.wallMat.emissive.setHex(0x000000);
   }
 
-  takeDamage(amount, sourceUnit) {
+  // reação por força do golpe: light = tremidinha; medium = flash + wobble; heavy/special = wobble forte + mais entulho + shake
+  takeDamage(amount, sourceUnit, { strength = 'medium' } = {}) {
     if (this.destroyed) return;
     if (sourceUnit && sourceUnit.debugSpawn) return;   // unidades do STRESS TEST não derrubam a base
     this.hp = Math.max(0, this.hp - amount);
-    this.flashTimer = 0.12;
-    this.hitWobble = 1;
-    bus.emit('baseHit', { base: this, amount, source: sourceUnit });
+    const heavy = strength === 'heavy' || strength === 'special';
+    const k = strength === 'light' ? 0.5 : heavy ? 1.6 : 1;
+    this.flashTimer = strength === 'light' ? 0.06 : 0.12;
+    this.hitWobble = Math.min(1.8, Math.max(this.hitWobble, k));
+    bus.emit('baseHit', { base: this, amount, source: sourceUnit, strength });
     const fb = Config.base.baseDamageFeedback;
     if (this.effects) {
       const pos = new THREE.Vector3((sourceUnit ? sourceUnit.pos.x : 0), 1.5, this.front);
-      this.effects.particles.burst(pos, Math.round(6 * fb), { color: 0xf5f1e6, speed: 3, size: 0.18, gravity: 8 });
-      this.effects.particles.burst(pos, Math.round(3 * fb), { color: 0xfdfdf5, speed: 2.5, size: 0.25, gravity: 2, paper: true });
+      this.effects.particles.burst(pos, Math.round(6 * fb * k), { color: 0xf5f1e6, speed: 3 * (heavy ? 1.5 : 1), size: 0.18, gravity: 8 });
+      this.effects.particles.burst(pos, Math.round(3 * fb * k), { color: 0xfdfdf5, speed: 2.5, size: 0.25, gravity: 2, paper: true });
     }
     this.updateStage();
     if (this.hp <= 0) this.destroy();
@@ -143,10 +146,12 @@ export class Base {
     if (p <= 0.5) stage = 2;
     if (p <= 0.25) stage = 3;
     if (stage !== this.stage) {
+      const was = this.stage;
       this.stage = stage;
       this.cracks.forEach((c, i) => (c.visible = stage >= 1 && (stage >= 2 || i < 3)));
       this.siren.visible = stage >= 3;
       bus.emit('baseStage', { base: this, stage });
+      if (stage >= 3 && was < 3) bus.emit('baseCritical', { team: this.team, base: this });   // crítico = mais caos (MatchEffects)
     }
   }
 
@@ -179,7 +184,7 @@ export class Base {
     const bs = Config.visual.baseVisualScale;
     if (this.hitWobble > 0) {
       this.hitWobble = Math.max(0, this.hitWobble - dt * 4);
-      const s = 1 + Math.sin(this.hitWobble * 20) * 0.03 * this.hitWobble * Config.base.baseDamageFeedback;
+      const s = 1 + Math.sin(this.hitWobble * 20) * 0.03 * Math.min(1.8, this.hitWobble) * Config.base.baseDamageFeedback;
       if (!this.destroyed) this.root.scale.set(bs * s, bs / s, bs * s);
     } else if (!this.destroyed) this.root.scale.setScalar(bs);
     // bandeira balança

@@ -12,11 +12,20 @@ export const Config = {
     maxCapital: 10,
     matchDuration: 180,     // segundos
     botDifficulty: 1.0,     // multiplica a "esperteza" e a velocidade de regen do bot
+    tretaFinalSpeedMultiplier: 1.25, // velocidade do jogo durante a TRETA FINAL (TimeController.matchMultiplier)
+  },
+
+  // ---------- TRETA FINAL (effects/MatchEffects.js) ----------
+  treta: {
+    lightMult: 0.62,        // luzes da cena × isto durante a Treta (escurece)
+    audioIntensity: 1.2,    // ganho dos sons × isto durante a Treta
+    alarmTickEvery: 2.0,    // s entre ticks de alarme enquanto uma base está crítica
   },
 
   base: {
     baseHP: 5000,
     baseDamageFeedback: 1.0, // intensidade dos efeitos de dano na base
+    heavyHitShake: 0.25,     // shake de câmera quando a base leva golpe heavy/special
   },
 
   // ---------- CÂMERA LATERAL ----------
@@ -41,6 +50,8 @@ export const Config = {
     cameraShakeStrength: 1.0,
     specialCameraZoom: 5,   // impulso de zoom (graus de fov) nos especiais; sempre reversível
     impulseDecay: 7,        // velocidade de retorno dos impulsos de câmera (≈ 400 ms)
+    endCameraZoom: 8,       // zoom curto na destruição da base
+    endCameraTowards: 0.35, // fração do z da base destruída para a qual o alvo da câmera se desloca (curto, reversível)
   },
 
   lanes: {
@@ -74,9 +85,9 @@ export const Config = {
     specialSlowScale: 0.45,         // slow-motion curtíssimo do MODO JURÁSSICO
     specialSlowDuration: 0.2,
     specialSlowRecovery: 0.15,
-    matchEndSlowScale: 0.25,        // slow-motion da destruição da base
-    matchEndSlowDuration: 1.0,
-    matchEndSlowRecovery: 0.3,
+    matchEndSlowScale: 0.25,        // slow-motion da destruição da base (≤ 600 ms no total)
+    matchEndSlowDuration: 0.45,
+    matchEndSlowRecovery: 0.15,
   },
 
   // ---------- UI / UX DAS CARTAS (ui/CardUI.js, ui/HUD.js) ----------

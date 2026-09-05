@@ -26,5 +26,6 @@ window.debugPanel = panel;
 const params = new URLSearchParams(location.search);
 if (params.get('auto') === '1') Config.debug.autoPlayer = true;
 if (params.get('speed')) Config.game.gameSpeed = parseFloat(params.get('speed'));
+if (params.get('dur')) Config.game.matchDuration = parseFloat(params.get('dur'));   // testes: partida curta → TRETA FINAL
 if (params.get('debug') === '1') { Config.debug.showStats = true; Config.debug.showAIDecisions = true; Config.perf.showPerfOverlay = true; }
 if (params.get('autostart') === '1') { game.screens.hideAll(); game.startMatch(); }

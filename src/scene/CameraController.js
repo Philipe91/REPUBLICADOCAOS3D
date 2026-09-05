@@ -28,6 +28,12 @@ export class CameraController {
     this._pos = new THREE.Vector3();
     this._target = new THREE.Vector3();
     this.zoomPunch = 0;    // usado na vitória
+    this._impulse = new THREE.Vector3();   // deslocamento curto do alvo (decai por impulseDecay)
+  }
+
+  // desloca o ALVO da câmera por um instante (ex.: olhar para a base destruída); volta sozinho
+  impulseOffset(x, y, z) {
+    this._impulse.set(x, y, z);
   }
 
   addShake(amount) {
@@ -58,9 +64,14 @@ export class CameraController {
     cameraPosition(this._pos, c).add(this._offset);
     this.camera.position.copy(this._pos);
     cameraTarget(this._target, c);
-    this._target.x += this._offset.x;
-    this._target.z += this._offset.z;
+    this._target.x += this._offset.x + this._impulse.x;
+    this._target.y += this._impulse.y;
+    this._target.z += this._offset.z + this._impulse.z;
     this.camera.lookAt(this._target);
-    this.zoomPunch = THREE.MathUtils.damp(this.zoomPunch, 0, Config.camera.impulseDecay, dt);
+    const k = Config.camera.impulseDecay;
+    this.zoomPunch = THREE.MathUtils.damp(this.zoomPunch, 0, k, dt);
+    this._impulse.x = THREE.MathUtils.damp(this._impulse.x, 0, k, dt);
+    this._impulse.y = THREE.MathUtils.damp(this._impulse.y, 0, k, dt);
+    this._impulse.z = THREE.MathUtils.damp(this._impulse.z, 0, k, dt);
   }
 }

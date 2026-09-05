@@ -358,8 +358,9 @@ export class Unit {
   _applyDamage(target, dmg, strength = this.strengthFor(dmg)) {
     if (!this.targetValid(target)) return;
     if (target.isBase) {
-      target.takeDamage(dmg * Config.base_damage.unitToBaseMultiplier * this.game.baseDamageRamp, this);
+      target.takeDamage(dmg * Config.base_damage.unitToBaseMultiplier * this.game.baseDamageRamp, this, { strength });
       this.game.audio.play('baseHit');
+      if (strength === 'heavy' || strength === 'special') this.game.camera.addShake(Config.base.heavyHitShake);
     } else {
       target.takeDamage(dmg, this, { knockback: this.knockback, strength });
     }

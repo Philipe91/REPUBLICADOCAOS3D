@@ -6,10 +6,11 @@ import GUI from 'lil-gui';
 import { Config } from '../config/Config.js';
 
 const RANGES = {
-  game: { capitalRegen: [0.2, 5, 0.1], startingCapital: [0, 10, 1], maxCapital: [5, 20, 1], matchDuration: [30, 600, 5], botDifficulty: [0.2, 3, 0.1] },
-  base: { baseHP: [500, 20000, 100], baseDamageFeedback: [0, 3, 0.1] },
+  game: { tretaFinalSpeedMultiplier: [0.5, 3, 0.05], capitalRegen: [0.2, 5, 0.1], startingCapital: [0, 10, 1], maxCapital: [5, 20, 1], matchDuration: [30, 600, 5], botDifficulty: [0.2, 3, 0.1] },
+  base: { baseHP: [500, 20000, 100], baseDamageFeedback: [0, 3, 0.1], heavyHitShake: [0, 1, 0.05] },
+  treta: { lightMult: [0.2, 1, 0.02], audioIntensity: [0.5, 2, 0.05], alarmTickEvery: [0.5, 6, 0.1] },
   // câmera lateral: cameraSide é enum e entra fora do loop (ver build())
-  camera: { cameraDistance: [8, 70, 0.5], cameraHeight: [0, 45, 0.5], cameraSideOffset: [-30, 30, 0.5], cameraFov: [15, 100, 1], cameraTargetX: [-20, 20, 0.5], cameraTargetY: [-2, 16, 0.1], cameraTargetZ: [-30, 30, 0.5], cameraShakeStrength: [0, 3, 0.1], specialCameraZoom: [0, 15, 0.5], impulseDecay: [2, 20, 0.5] },
+  camera: { cameraDistance: [8, 70, 0.5], cameraHeight: [0, 45, 0.5], cameraSideOffset: [-30, 30, 0.5], cameraFov: [15, 100, 1], cameraTargetX: [-20, 20, 0.5], cameraTargetY: [-2, 16, 0.1], cameraTargetZ: [-30, 30, 0.5], cameraShakeStrength: [0, 3, 0.1], specialCameraZoom: [0, 15, 0.5], impulseDecay: [2, 20, 0.5], endCameraZoom: [0, 20, 0.5], endCameraTowards: [0, 1, 0.05] },
   lanes: { laneSpacing: [4, 10, 0.5], laneWidth: [2, 8, 0.5], spawnOffset: [0, 10, 0.5], fieldLength: [30, 70, 1] },
   combat: { globalDamageMultiplier: [0.1, 5, 0.05], globalHPMultiplier: [0.1, 5, 0.05], globalMoveSpeedMultiplier: [0.1, 4, 0.05], knockbackStrength: [0, 4, 0.1], bigHitThreshold: [10, 300, 5], mediumHitThreshold: [1, 200, 1], impactTimeout: [0, 0.6, 0.01], hitFlashDuration: [0, 0.4, 0.01], deathKnockbackMultiplier: [0, 4, 0.1], smallUnitDeathFlyMult: [0.5, 4, 0.1] },
   bot: { botDecisionInterval: [0.3, 5, 0.1], botAggressiveness: [0, 2, 0.05], botDefenseBias: [0, 2, 0.05], botRandomness: [0, 1, 0.05] },
@@ -37,7 +38,7 @@ export class DebugPanel {
     gui.add({ copiar: () => this.copyConfig() }, 'copiar').name('📋 COPIAR CONFIG (JSON)');
     gui.add({ reiniciar: () => { this.game.screens.hideAll(); this.game.startMatch(this.game.screens.playerDeck); } }, 'reiniciar').name('🔄 REINICIAR PARTIDA');
 
-    const labels = { game: 'GAME', base: 'BASE', camera: 'CÂMERA', lanes: 'LANES', combat: 'COMBATE', bot: 'BOT', visual: 'VISUAL' };
+    const labels = { game: 'GAME', base: 'BASE', treta: 'TRETA FINAL', camera: 'CÂMERA', lanes: 'LANES', combat: 'COMBATE', bot: 'BOT', visual: 'VISUAL' };
     for (const section in RANGES) {
       const f = gui.addFolder(labels[section]);
       f.close();

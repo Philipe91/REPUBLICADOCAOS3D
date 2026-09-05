@@ -22,6 +22,7 @@ export class TimeController {
     this.gameDt = 0;
     this.visualDt = 0;
     this.inHitStop = false;
+    this.matchMultiplier = 1; // ex.: TRETA FINAL (Config.game.tretaFinalSpeedMultiplier); o Game define
     this._budgetUsed = 0;    // hit-stop concedido na janela de 1 s corrente
     this._budgetClock = 0;
   }
@@ -57,6 +58,7 @@ export class TimeController {
     this.slows.length = 0;
     this.scale = 1;
     this.inHitStop = false;
+    this.matchMultiplier = 1;
     this._budgetUsed = 0;
     this._budgetClock = 0;
   }
@@ -83,7 +85,7 @@ export class TimeController {
     }
     this.scale = s;
 
-    let gameDt = rawDt * this.gameSpeed * s;
+    let gameDt = rawDt * this.gameSpeed * this.matchMultiplier * s;
     let visualDt = gameDt;
     this.inHitStop = false;
     if (this.hitStopTimer > 0) {

@@ -26,7 +26,9 @@ export class AudioManager {
 
   resume() { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); }
 
-  setVolume(v) { this.volume = v; if (this.master) this.master.gain.value = v; }
+  setVolume(v) { this.volume = v; if (this.master) this.master.gain.value = v * (this.intensity || 1); }
+  // intensidade momentânea (ex.: TRETA FINAL) — multiplica o ganho mestre, reversível
+  setIntensity(k) { this.intensity = k; if (this.master) this.master.gain.value = this.volume * k; }
 
   _tone({ freq = 440, freq2 = null, type = 'square', dur = 0.1, gain = 0.3, delay = 0, decay = true }) {
     if (!this.ctx || !this.enabled) return;
@@ -127,6 +129,12 @@ export class AudioManager {
         break;
       case 'stun':
         this._tone({ freq: 1500, freq2: 300, type: 'square', dur: 0.35, gain: 0.2 });
+        break;
+      case 'alarm':   // sirene de duas notas
+        for (let i = 0; i < 3; i++) { this._tone({ freq: 620, type: 'square', dur: 0.18, gain: 0.16, delay: i * 0.4 }); this._tone({ freq: 470, type: 'square', dur: 0.18, gain: 0.16, delay: i * 0.4 + 0.2 }); }
+        break;
+      case 'alarmTick':
+        this._tone({ freq: 560, freq2: 420, type: 'square', dur: 0.12, gain: 0.09 });
         break;
       case 'roar':
         this._tone({ freq: 60, freq2: 25, type: 'sawtooth', dur: 0.6, gain: 0.5 });
